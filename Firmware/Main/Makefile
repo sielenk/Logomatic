@@ -242,7 +242,7 @@ LPC21ISP_CONTROL = -control
 ## DIRAVRUTILS = $(DIRAVR)/utils/bin/
 
 # Define programs and commands.
-TARGET_PREFIX=arm-elf-
+TARGET_PREFIX=arm-softfloat-eabi-
 SHELL = sh
 CC = $(TARGET_PREFIX)gcc
 CPP = $(TARGET_PREFIX)g++
