@@ -21,6 +21,7 @@
 #include "itoa.h"
 #include "rootdir.h"
 #include "sd_raw.h"
+#include "string_printf.h"
 
 
 /*******************************************************
