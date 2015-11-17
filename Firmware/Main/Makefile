@@ -34,7 +34,7 @@ TARGET = main
 
 # List C source files here. (C dependencies are automatically generated.)
 # use file-extension c for "c-only"-files
-SRC = $(TARGET).c 
+SRC = 
 
 #Needed most of the time for basic functions
 SRC += $(LIBPATH)syscalls.c 
@@ -58,7 +58,7 @@ SRCARM = $(LIBPATH)irq.c
 
 # List C++ source files here.
 # use file-extension cpp for C++-files (use extension .cpp)
-CPPSRC = 
+CPPSRC = $(TARGET).cpp
 
 # List C++ source files here which must be compiled in ARM-Mode.
 # use file-extension cpp for C++-files (use extension .cpp)
@@ -170,8 +170,7 @@ CONLYFLAGS += -Wmissing-declarations
 endif
 
 # flags only for C++ (arm-elf-g++)
-# CPPFLAGS = -fno-rtti -fno-exceptions
-CPPFLAGS = 
+CPPFLAGS = -fno-rtti -fno-exceptions
 
 # Assembler flags.
 #  -Wa,...:    tell GCC to pass this to the assembler.

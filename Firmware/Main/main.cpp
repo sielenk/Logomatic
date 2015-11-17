@@ -11,10 +11,13 @@
 #include "LPC21xx.h"
 
 // UART0 Debugging
+extern "C" {
 #include "serial.h"
 #include "rprintf.h"
+}
 
 // Needed for main function calls
+extern "C" {
 #include "main_msc.h"
 #include "fat.h"
 #include "armVIC.h"
@@ -22,6 +25,7 @@
 #include "rootdir.h"
 #include "sd_raw.h"
 #include "string_printf.h"
+}
 
 /*******************************************************
  * 		     Global Variables
@@ -90,7 +94,7 @@ void UNDEF_Routine(void) __attribute__((interrupt("UNDEF")));
 
 void fat_initialize(void);
 
-void delay_ms(int count);
+extern "C" void delay_ms(int count);
 
 /*******************************************************
  * 		     	MAIN
