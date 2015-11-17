@@ -45,8 +45,8 @@ namespace {
   char get_frame = 0;
 
   signed int stringSize;
-  struct fat_file_struct *handle;
-  struct fat_file_struct *fd;
+  struct fat_file_struct* handle;
+  struct fat_file_struct* fd;
   char stringBuf[256];
 
   // Default Settings
@@ -813,7 +813,7 @@ void local::Log_init() {
   if (root_file_exists("LOGCON.txt")) {
     // rprintf("\n\rFound LOGcon.txt\n");
     fd = root_open("LOGCON.txt");
-    stringSize = fat_read_file(fd, (unsigned char *)stringBuf, 512);
+    stringSize = fat_read_file(fd, (unsigned char*)stringBuf, 512);
     stringBuf[stringSize] = '\0';
     fat_close_file(fd);
   } else {
@@ -837,7 +837,7 @@ void local::Log_init() {
            "N\r\nAD0.2 = N\r\nAD0.1 = N\r\nAD1.2 = N\r\nAD0.4 = N\r\nAD1.7 = "
            "N\r\nAD1.6 = N\r\nSaftey On = Y\r\n");
     stringSize = strlen(stringBuf);
-    fat_write_file(fd, (unsigned char *)stringBuf, stringSize);
+    fat_write_file(fd, (unsigned char*)stringBuf, stringSize);
     sd_raw_sync();
   }
 
@@ -1027,7 +1027,7 @@ void local::mode_action() {
     if (log_array1 == 1) {
       stat(0, ON);
 
-      if (fat_write_file(handle, (unsigned char *)RX_array1, stringSize) < 0) {
+      if (fat_write_file(handle, (unsigned char*)RX_array1, stringSize) < 0) {
         while (1) {
           stat(0, ON);
           for (j = 0; j < 500000; j++) stat(0, OFF);
@@ -1044,7 +1044,7 @@ void local::mode_action() {
     if (log_array2 == 1) {
       stat(1, ON);
 
-      if (fat_write_file(handle, (unsigned char *)RX_array2, stringSize) < 0) {
+      if (fat_write_file(handle, (unsigned char*)RX_array2, stringSize) < 0) {
         while (1) {
           stat(0, ON);
           for (j = 0; j < 500000; j++) stat(0, OFF);
@@ -1063,10 +1063,10 @@ void local::mode_action() {
       VICIntEnClr = 0xFFFFFFFF;
 
       if (RX_in < buf_size) {
-        fat_write_file(handle, (unsigned char *)RX_array1, RX_in);
+        fat_write_file(handle, (unsigned char*)RX_array1, RX_in);
         sd_raw_sync();
       } else if (RX_in >= buf_size) {
-        fat_write_file(handle, (unsigned char *)RX_array2, RX_in - buf_size);
+        fat_write_file(handle, (unsigned char*)RX_array2, RX_in - buf_size);
         sd_raw_sync();
       }
       while (1) {
