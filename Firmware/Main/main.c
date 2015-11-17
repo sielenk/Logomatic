@@ -293,9 +293,7 @@ static void MODE2ISR(void) {
       temp_buff[2] = 0;
       temp_buff[3] = 0;
 
-    }
-
-    else if (asc == 'N') {
+    } else if (asc == 'N') {
       a = ((short)temp2 & 0xFF00) / 0x00000100;
       q[ind] = (char)a;
 
@@ -344,9 +342,7 @@ static void MODE2ISR(void) {
       temp_buff[2] = 0;
       temp_buff[3] = 0;
 
-    }
-
-    else if (asc == 'N') {
+    } else if (asc == 'N') {
       a = ((short)temp2 & 0xFF00) / 0x00000100;
       q[ind] = (char)a;
 
@@ -394,10 +390,7 @@ static void MODE2ISR(void) {
       temp_buff[1] = 0;
       temp_buff[2] = 0;
       temp_buff[3] = 0;
-
-    }
-
-    else if (asc == 'N') {
+    } else if (asc == 'N') {
       a = ((short)temp2 & 0xFF00) / 0x00000100;
       q[ind] = (char)a;
 
@@ -445,10 +438,7 @@ static void MODE2ISR(void) {
       temp_buff[1] = 0;
       temp_buff[2] = 0;
       temp_buff[3] = 0;
-
-    }
-
-    else if (asc == 'N') {
+    } else if (asc == 'N') {
       a = ((short)temp2 & 0xFF00) / 0x00000100;
       q[ind] = (char)a;
 
@@ -496,10 +486,7 @@ static void MODE2ISR(void) {
       temp_buff[1] = 0;
       temp_buff[2] = 0;
       temp_buff[3] = 0;
-
-    }
-
-    else if (asc == 'N') {
+    } else if (asc == 'N') {
       a = ((short)temp2 & 0xFF00) / 0x00000100;
       q[ind] = (char)a;
 
@@ -547,10 +534,7 @@ static void MODE2ISR(void) {
       temp_buff[1] = 0;
       temp_buff[2] = 0;
       temp_buff[3] = 0;
-
-    }
-
-    else if (asc == 'N') {
+    } else if (asc == 'N') {
       a = ((short)temp2 & 0xFF00) / 0x00000100;
       q[ind] = (char)a;
 
@@ -598,10 +582,7 @@ static void MODE2ISR(void) {
       temp_buff[1] = 0;
       temp_buff[2] = 0;
       temp_buff[3] = 0;
-
-    }
-
-    else if (asc == 'N') {
+    } else if (asc == 'N') {
       a = ((short)temp2 & 0xFF00) / 0x00000100;
       q[ind] = (char)a;
 
@@ -649,10 +630,7 @@ static void MODE2ISR(void) {
       temp_buff[1] = 0;
       temp_buff[2] = 0;
       temp_buff[3] = 0;
-
-    }
-
-    else if (asc == 'N') {
+    } else if (asc == 'N') {
       a = ((short)temp2 & 0xFF00) / 0x00000100;
       q[ind] = (char)a;
 
@@ -800,6 +778,7 @@ void setup_uart0(int newbaud, char want_ints) {
     U0IER = 0x00;
   }
 }
+
 void stat(int statnum, int onoff) {
   if (statnum)  // Stat 1
   {
