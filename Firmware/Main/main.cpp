@@ -742,30 +742,39 @@ void local::setup_uart0(int newbaud, char want_ints) {
   baud = newbaud;
   U0LCR = 0x83;  // 8 bits, no parity, 1 stop bit, DLAB = 1
 
-  if (baud == 1200) {
+  switch (baud) {
+  case 1200:
     U0DLM = 0x0C;
     U0DLL = 0x00;
-  } else if (baud == 2400) {
+    break;
+  case 2400:
     U0DLM = 0x06;
     U0DLL = 0x00;
-  } else if (baud == 4800) {
+    break;
+  case 4800:
     U0DLM = 0x03;
     U0DLL = 0x00;
-  } else if (baud == 9600) {
+    break;
+  case 9600:
     U0DLM = 0x01;
     U0DLL = 0x80;
-  } else if (baud == 19200) {
+    break;
+  case 19200:
     U0DLM = 0x00;
     U0DLL = 0xC0;
-  } else if (baud == 38400) {
+    break;
+  case 38400:
     U0DLM = 0x00;
     U0DLL = 0x60;
-  } else if (baud == 57600) {
+    break;
+  case 57600:
     U0DLM = 0x00;
     U0DLL = 0x40;
-  } else if (baud == 115200) {
+    break;
+  case 115200:
     U0DLM = 0x00;
     U0DLL = 0x20;
+    break;
   }
 
   U0FCR = 0x01;
@@ -860,22 +869,31 @@ void local::Log_init() {
         asc = stringBuf[mark - 2];  // default is 'N'
         rprintf("asc = %c\n\r", asc);
       } else if (ind == 3) {
-        if (stringBuf[mark - 2] == '1') {
+        switch (stringBuf[mark - 2]) {
+        case '1':
           baud = 1200;
-        } else if (stringBuf[mark - 2] == '2') {
+          break;
+        case '2':
           baud = 2400;
-        } else if (stringBuf[mark - 2] == '3') {
+          break;
+        case '3':
           baud = 4800;
-        } else if (stringBuf[mark - 2] == '4') {
+          break;
+        case '4':
           baud = 9600;
-        } else if (stringBuf[mark - 2] == '5') {
+          break;
+        case '5':
           baud = 19200;
-        } else if (stringBuf[mark - 2] == '6') {
+          break;
+        case '6':
           baud = 38400;
-        } else if (stringBuf[mark - 2] == '7') {
+          break;
+        case '7':
           baud = 57600;
-        } else if (stringBuf[mark - 2] == '8') {
+          break;
+        case '8':
           baud = 115200;
+          break;
         }
 
         rprintf("baud = %d\n\r", baud);
