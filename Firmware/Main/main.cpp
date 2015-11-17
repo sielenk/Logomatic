@@ -101,10 +101,6 @@ extern "C" void delay_ms(int count);
  ******************************************************/
 
 int main() {
-  int i;
-  char name[32];
-  int count = 0;
-
   enableFIQ();
 
   local::Initialize();
@@ -114,7 +110,7 @@ int main() {
   local::fat_initialize();
 
   // Flash Status Lights
-  for (i = 0; i < 5; i++) {
+  for (int i = 0; i < 5; i++) {
     local::stat(0, ON);
     delay_ms(50);
     local::stat(0, OFF);
@@ -125,12 +121,20 @@ int main() {
 
   local::Log_init();
 
-  count++;
-  string_printf(name, "LOG%02d.txt", count);
-  while (root_file_exists(name)) {
-    count++;
+  char name[32];
+  int count = 1;
+
+  for (;;) {
+    string_printf(name, "LOG%02d.txt", count);
+
+    if (!root_file_exists(name)) {
+      break;
+    }
+
+    ++count;
     if (count == 250) {
       rprintf("Too Many Logs!\n\r");
+
       while (1) {
         local::stat(0, ON);
         local::stat(1, ON);
@@ -140,7 +144,6 @@ int main() {
         delay_ms(1000);
       }
     }
-    string_printf(name, "LOG%02d.txt", count);
   }
 
   handle = root_open_new(name);
