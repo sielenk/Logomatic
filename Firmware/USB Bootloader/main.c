@@ -9,6 +9,8 @@
 */	
 #include "LPC214x.h"
 
+#include "delay.h"
+
 //UART0 Debugging
 #include "serial.h"
 #include "rprintf.h"

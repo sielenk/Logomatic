@@ -26,7 +26,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include "rprintf.h"
-//#include "system.h" //Needed for delay_ms
+#include "delay.h" //Needed for delay_ms
 
 #define SCRATCH 12  //32Bits go up to 4GB + 1 Byte for \0
 
@@ -45,8 +45,6 @@
 // only lowercase format flags are used
 #define PADDING         //SPACE and ZERO padding
 
-
-void delay_ms(int count);
 
 static int (*putcharfunc)(int c);
 

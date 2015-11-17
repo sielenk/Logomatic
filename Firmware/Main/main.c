@@ -22,6 +22,7 @@
 #include "rootdir.h"
 #include "sd_raw.h"
 #include "string_printf.h"
+#include "delay.h"
 
 /*******************************************************
  * 		     Global Variables
@@ -89,8 +90,6 @@ void SWI_Routine(void) __attribute__((interrupt("SWI")));
 void UNDEF_Routine(void) __attribute__((interrupt("UNDEF")));
 
 void fat_initialize(void);
-
-void delay_ms(int count);
 
 /*******************************************************
  * 		     	MAIN
@@ -1166,10 +1165,4 @@ void fat_initialize(void) {
   if (openroot()) {
     rprintf("SD OpenRoot Error\n\r");
   }
-}
-
-void delay_ms(int count) {
-  int i;
-  count *= 10000;
-  for (i = 0; i < count; i++) asm volatile("nop");
 }
