@@ -36,6 +36,7 @@ extern "C" {
 
 #define buf_size 512
 
+namespace {
 char RX_array1[buf_size];
 char RX_array2[buf_size];
 char log_array1 = 0;
@@ -49,25 +50,27 @@ struct fat_file_struct *fd;
 char stringBuf[256];
 
 // Default Settings
-static char mode = 0;
-static char asc = 'N';
-static int baud = 9600;
-static int freq = 100;
-static char trig = '$';
-static short frame = 100;
-static char ad1_7 = 'N';
-static char ad1_6 = 'N';
-static char ad1_3 = 'N';
-static char ad1_2 = 'N';
-static char ad0_4 = 'N';
-static char ad0_3 = 'N';
-static char ad0_2 = 'N';
-static char ad0_1 = 'N';
+char mode = 0;
+char asc = 'N';
+int baud = 9600;
+int freq = 100;
+char trig = '$';
+short frame = 100;
+char ad1_7 = 'N';
+char ad1_6 = 'N';
+char ad1_3 = 'N';
+char ad1_2 = 'N';
+char ad0_4 = 'N';
+char ad0_3 = 'N';
+char ad0_2 = 'N';
+char ad0_1 = 'N';
+}
 
 /*******************************************************
  * 		 Function Declarations
  ******************************************************/
 
+namespace local {
 void Initialize();
 
 void setup_uart0(int newbaud, char want_ints);
@@ -84,15 +87,12 @@ void AD_conversion(int regbank);
 
 void feed();
 
-static void UART0ISR();    //__attribute__ ((interrupt("IRQ")));
-static void UART0ISR_2();  //__attribute__ ((interrupt("IRQ")));
-static void MODE2ISR();    //__attribute__ ((interrupt("IRQ")));
-
 void FIQ_Routine() __attribute__((interrupt("FIQ")));
 void SWI_Routine() __attribute__((interrupt("SWI")));
 void UNDEF_Routine() __attribute__((interrupt("UNDEF")));
 
 void fat_initialize();
+}
 
 extern "C" void delay_ms(int count);
 
@@ -107,23 +107,23 @@ int main() {
 
   enableFIQ();
 
-  Initialize();
+  local::Initialize();
 
-  setup_uart0(9600, 0);
+  local::setup_uart0(9600, 0);
 
-  fat_initialize();
+  local::fat_initialize();
 
   // Flash Status Lights
   for (i = 0; i < 5; i++) {
-    stat(0, ON);
+    local::stat(0, ON);
     delay_ms(50);
-    stat(0, OFF);
-    stat(1, ON);
+    local::stat(0, OFF);
+    local::stat(1, ON);
     delay_ms(50);
-    stat(1, OFF);
+    local::stat(1, OFF);
   }
 
-  Log_init();
+  local::Log_init();
 
   count++;
   string_printf(name, "LOG%02d.txt", count);
@@ -132,11 +132,11 @@ int main() {
     if (count == 250) {
       rprintf("Too Many Logs!\n\r");
       while (1) {
-        stat(0, ON);
-        stat(1, ON);
+        local::stat(0, ON);
+        local::stat(1, ON);
         delay_ms(1000);
-        stat(0, OFF);
-        stat(1, OFF);
+        local::stat(0, OFF);
+        local::stat(1, OFF);
         delay_ms(1000);
       }
     }
@@ -148,11 +148,11 @@ int main() {
   sd_raw_sync();
 
   if (mode == 0) {
-    mode_0();
+    local::mode_0();
   } else if (mode == 1) {
-    mode_1();
+    local::mode_1();
   } else if (mode == 2) {
-    mode_2();
+    local::mode_2();
   }
 
   return 0;
@@ -164,7 +164,7 @@ int main() {
 
 #define PLOCK 0x400
 
-void Initialize() {
+void local::Initialize() {
   rprintf_devopen(putc_serial0);
 
   PINSEL0 = 0xCF351505;
@@ -176,12 +176,13 @@ void Initialize() {
   S0SPCR = 0x30;  // master, msb, first clk edge, active high, no ints
 }
 
-void feed() {
+void local::feed() {
   PLLFEED = 0xAA;
   PLLFEED = 0x55;
 }
 
-static void UART0ISR() {
+namespace {
+void UART0ISR() {
   char temp;
 
   if (RX_in < buf_size) {
@@ -207,7 +208,7 @@ static void UART0ISR() {
   (void)temp;
 }
 
-static void UART0ISR_2() {
+void UART0ISR_2() {
   char temp;
   temp = U0RBR;
 
@@ -245,7 +246,7 @@ static void UART0ISR_2() {
   VICVectAddr = 0;
 }
 
-static void MODE2ISR() {
+void MODE2ISR() {
   int temp = 0, temp2 = 0, ind = 0;
   int j;
   short a;
@@ -707,15 +708,16 @@ static void MODE2ISR() {
 
   VICVectAddr = 0;
 }
+}
 
-void FIQ_Routine() {
+void local::FIQ_Routine() {
   char a;
   int j;
 
-  stat(0, ON);
+  local::stat(0, ON);
   for (j = 0; j < 5000000; j++)
     ;
-  stat(0, OFF);
+  local::stat(0, OFF);
   a = U0RBR;
 
   a = U0IIR;  // have to read this to clear the interrupt
@@ -723,14 +725,14 @@ void FIQ_Routine() {
   (void)a;
 }
 
-void SWI_Routine() {
+void local::SWI_Routine() {
   while (1)
     ;
 }
 
-void UNDEF_Routine() { stat(0, ON); }
+void local::UNDEF_Routine() { stat(0, ON); }
 
-void setup_uart0(int newbaud, char want_ints) {
+void local::setup_uart0(int newbaud, char want_ints) {
   baud = newbaud;
   U0LCR = 0x83;  // 8 bits, no parity, 1 stop bit, DLAB = 1
 
@@ -783,7 +785,7 @@ void setup_uart0(int newbaud, char want_ints) {
   }
 }
 
-void stat(int statnum, int onoff) {
+void local::stat(int statnum, int onoff) {
   if (statnum)  // Stat 1
   {
     if (onoff) {
@@ -803,7 +805,7 @@ void stat(int statnum, int onoff) {
   }
 }
 
-void Log_init() {
+void local::Log_init() {
   int x, mark = 0, ind = 0;
   char temp, temp2 = 0, safety = 0;
   //	signed char handle;
@@ -977,7 +979,7 @@ void Log_init() {
   }
 }
 
-void mode_0()  // Auto UART mode
+void local::mode_0()  // Auto UART mode
 {
   rprintf("MODE 0\n\r");
   setup_uart0(baud, 1);
@@ -986,7 +988,7 @@ void mode_0()  // Auto UART mode
   // rprintf("Exit mode 0\n\r");
 }
 
-void mode_1() {
+void local::mode_1() {
   rprintf("MODE 1\n\r");
 
   setup_uart0(baud, 2);
@@ -995,7 +997,7 @@ void mode_1() {
   mode_action();
 }
 
-void mode_2() {
+void local::mode_2() {
   rprintf("MODE 2\n\r");
   enableIRQ();
   // Timer0  interrupt is an IRQ interrupt
@@ -1019,7 +1021,7 @@ void mode_2() {
   mode_action();
 }
 
-void mode_action() {
+void local::mode_action() {
   int j;
   while (1) {
     if (log_array1 == 1) {
@@ -1081,7 +1083,7 @@ void mode_action() {
   }
 }
 
-void test() {
+void local::test() {
   rprintf("\n\rLogomatic V2 Test Code:\n\r");
   rprintf(
       "ADC Test will begin in 5 seconds, hit stop button to terminate the "
@@ -1131,7 +1133,7 @@ void test() {
     ;
 }
 
-void AD_conversion(int regbank) {
+void local::AD_conversion(int regbank) {
   int temp = 0, temp2;
 
   if (!regbank)  // bank 0
@@ -1160,7 +1162,7 @@ void AD_conversion(int regbank) {
   rprintf("   ");
 }
 
-void fat_initialize() {
+void local::fat_initialize() {
   if (!sd_raw_init()) {
     rprintf("SD Init Error\n\r");
     while (1)
