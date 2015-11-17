@@ -68,31 +68,31 @@ static char ad0_1 = 'N';
  * 		 Function Declarations
  ******************************************************/
 
-void Initialize(void);
+void Initialize();
 
 void setup_uart0(int newbaud, char want_ints);
 
-void mode_0(void);
-void mode_1(void);
-void mode_2(void);
-void mode_action(void);
+void mode_0();
+void mode_1();
+void mode_2();
+void mode_action();
 
-void Log_init(void);
-void test(void);
+void Log_init();
+void test();
 void stat(int statnum, int onoff);
 void AD_conversion(int regbank);
 
-void feed(void);
+void feed();
 
-static void UART0ISR(void);    //__attribute__ ((interrupt("IRQ")));
-static void UART0ISR_2(void);  //__attribute__ ((interrupt("IRQ")));
-static void MODE2ISR(void);    //__attribute__ ((interrupt("IRQ")));
+static void UART0ISR();    //__attribute__ ((interrupt("IRQ")));
+static void UART0ISR_2();  //__attribute__ ((interrupt("IRQ")));
+static void MODE2ISR();    //__attribute__ ((interrupt("IRQ")));
 
-void FIQ_Routine(void) __attribute__((interrupt("FIQ")));
-void SWI_Routine(void) __attribute__((interrupt("SWI")));
-void UNDEF_Routine(void) __attribute__((interrupt("UNDEF")));
+void FIQ_Routine() __attribute__((interrupt("FIQ")));
+void SWI_Routine() __attribute__((interrupt("SWI")));
+void UNDEF_Routine() __attribute__((interrupt("UNDEF")));
 
-void fat_initialize(void);
+void fat_initialize();
 
 extern "C" void delay_ms(int count);
 
@@ -100,7 +100,7 @@ extern "C" void delay_ms(int count);
  * 		     	MAIN
  ******************************************************/
 
-int main(void) {
+int main() {
   int i;
   char name[32];
   int count = 0;
@@ -164,7 +164,7 @@ int main(void) {
 
 #define PLOCK 0x400
 
-void Initialize(void) {
+void Initialize() {
   rprintf_devopen(putc_serial0);
 
   PINSEL0 = 0xCF351505;
@@ -176,12 +176,12 @@ void Initialize(void) {
   S0SPCR = 0x30;  // master, msb, first clk edge, active high, no ints
 }
 
-void feed(void) {
+void feed() {
   PLLFEED = 0xAA;
   PLLFEED = 0x55;
 }
 
-static void UART0ISR(void) {
+static void UART0ISR() {
   char temp;
 
   if (RX_in < buf_size) {
@@ -207,7 +207,7 @@ static void UART0ISR(void) {
   (void)temp;
 }
 
-static void UART0ISR_2(void) {
+static void UART0ISR_2() {
   char temp;
   temp = U0RBR;
 
@@ -245,7 +245,7 @@ static void UART0ISR_2(void) {
   VICVectAddr = 0;
 }
 
-static void MODE2ISR(void) {
+static void MODE2ISR() {
   int temp = 0, temp2 = 0, ind = 0;
   int j;
   short a;
@@ -708,7 +708,7 @@ static void MODE2ISR(void) {
   VICVectAddr = 0;
 }
 
-void FIQ_Routine(void) {
+void FIQ_Routine() {
   char a;
   int j;
 
@@ -723,12 +723,12 @@ void FIQ_Routine(void) {
   (void)a;
 }
 
-void SWI_Routine(void) {
+void SWI_Routine() {
   while (1)
     ;
 }
 
-void UNDEF_Routine(void) { stat(0, ON); }
+void UNDEF_Routine() { stat(0, ON); }
 
 void setup_uart0(int newbaud, char want_ints) {
   baud = newbaud;
@@ -803,7 +803,7 @@ void stat(int statnum, int onoff) {
   }
 }
 
-void Log_init(void) {
+void Log_init() {
   int x, mark = 0, ind = 0;
   char temp, temp2 = 0, safety = 0;
   //	signed char handle;
@@ -977,7 +977,7 @@ void Log_init(void) {
   }
 }
 
-void mode_0(void)  // Auto UART mode
+void mode_0()  // Auto UART mode
 {
   rprintf("MODE 0\n\r");
   setup_uart0(baud, 1);
@@ -986,7 +986,7 @@ void mode_0(void)  // Auto UART mode
   // rprintf("Exit mode 0\n\r");
 }
 
-void mode_1(void) {
+void mode_1() {
   rprintf("MODE 1\n\r");
 
   setup_uart0(baud, 2);
@@ -995,7 +995,7 @@ void mode_1(void) {
   mode_action();
 }
 
-void mode_2(void) {
+void mode_2() {
   rprintf("MODE 2\n\r");
   enableIRQ();
   // Timer0  interrupt is an IRQ interrupt
@@ -1019,7 +1019,7 @@ void mode_2(void) {
   mode_action();
 }
 
-void mode_action(void) {
+void mode_action() {
   int j;
   while (1) {
     if (log_array1 == 1) {
@@ -1081,7 +1081,7 @@ void mode_action(void) {
   }
 }
 
-void test(void) {
+void test() {
   rprintf("\n\rLogomatic V2 Test Code:\n\r");
   rprintf(
       "ADC Test will begin in 5 seconds, hit stop button to terminate the "
@@ -1160,7 +1160,7 @@ void AD_conversion(int regbank) {
   rprintf("   ");
 }
 
-void fat_initialize(void) {
+void fat_initialize() {
   if (!sd_raw_init()) {
     rprintf("SD Init Error\n\r");
     while (1)
