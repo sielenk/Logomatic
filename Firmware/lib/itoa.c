@@ -4,6 +4,8 @@ Print integers in a given base 2-16 (default 10)
 //#include <stdio.h>
 //#include <stdlib.h>
 
+#include "itoa.h"
+
 int convert(int n, int b, char str[], int i) {
 	if (n/b > 0)
 		i = convert(n/b, b, str, i);

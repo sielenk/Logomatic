@@ -46,6 +46,8 @@
 #define PADDING         //SPACE and ZERO padding
 
 
+void delay_ms(int count);
+
 static int (*putcharfunc)(int c);
 
 void rprintf_devopen( int(*put)(int) )

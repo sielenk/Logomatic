@@ -82,7 +82,6 @@ void AD_conversion(int regbank);
 
 void feed(void);
 
-static void IRQ_Routine(void) __attribute__ ((interrupt("IRQ")));
 static void UART0ISR(void); //__attribute__ ((interrupt("IRQ")));
 static void UART0ISR_2(void); //__attribute__ ((interrupt("IRQ")));
 static void MODE2ISR(void); //__attribute__ ((interrupt("IRQ")));
@@ -218,7 +217,8 @@ static void UART0ISR(void)
 	temp = U0IIR; // Have to read this to clear the interrupt 
 
 	VICVectAddr = 0;
-	
+
+	(void)temp;
 }
 
 static void UART0ISR_2(void)
@@ -831,6 +831,8 @@ void FIQ_Routine(void)
 	a = U0RBR;
 
 	a = U0IIR;  // have to read this to clear the interrupt
+
+	(void)a;
 }
 
 void SWI_Routine(void)
