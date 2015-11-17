@@ -150,12 +150,16 @@ int main() {
 
   sd_raw_sync();
 
-  if (mode == 0) {
+  switch (mode) {
+  case 0:
     local::mode_0();
-  } else if (mode == 1) {
+    break;
+  case 1:
     local::mode_1();
-  } else if (mode == 2) {
+    break;
+  case 2:
     local::mode_2();
+    break;
   }
 
   return 0;
