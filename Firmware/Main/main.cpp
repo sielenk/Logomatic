@@ -25,6 +25,7 @@ extern "C" {
 #include "rootdir.h"
 #include "sd_raw.h"
 #include "string_printf.h"
+#include "delay.h"
 }
 
 /*******************************************************
@@ -93,8 +94,6 @@ namespace local {
 
   void fat_initialize();
 }
-
-extern "C" void delay_ms(int count);
 
 /*******************************************************
  * 		     	MAIN
@@ -1179,10 +1178,4 @@ void local::fat_initialize() {
   if (openroot()) {
     rprintf("SD OpenRoot Error\n\r");
   }
-}
-
-void delay_ms(int count) {
-  int i;
-  count *= 10000;
-  for (i = 0; i < count; i++) asm volatile("nop");
 }

@@ -37,10 +37,11 @@ TARGET = main
 SRC = 
 
 #Needed most of the time for basic functions
-SRC += $(LIBPATH)syscalls.c 
-SRC += $(LIBPATH)rprintf.c 
-SRC += $(LIBPATH)string_printf.c 
-SRC += $(LIBPATH)serial.c 
+SRC += $(LIBPATH)syscalls.c
+SRC += $(LIBPATH)rprintf.c
+SRC += $(LIBPATH)string_printf.c
+SRC += $(LIBPATH)serial.c
+SRC += $(LIBPATH)delay.c
 
 #Functions for SD interaction
 SRC += $(LIBPATH)rootdir.c 

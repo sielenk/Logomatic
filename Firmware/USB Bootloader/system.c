@@ -36,17 +36,6 @@ void UNDEF_Routine (void)
 {
 };
 
-//Short delay
-void delay_ms(int count)
-{
-    int i;
-    count *= 10000;
-    for (i = 0; i < count; i++)
-    {
-        asm volatile ("nop");
-    }
-}
-
 void boot_up(void)
 {
     //Initialize the MCU clock PLL
