@@ -252,406 +252,165 @@ namespace {
     VICVectAddr = 0;
   }
 
+  void pushValue(char* q, int& ind, int temp2) {
+    char temp_buff[4] = {};
+
+    if (asc == 'Y') {
+      itoa(temp2, 10, temp_buff);
+      if (temp_buff[0] >= 48 && temp_buff[0] <= 57) {
+        q[ind] = temp_buff[0];
+        ind++;
+      }
+      if (temp_buff[1] >= 48 && temp_buff[1] <= 57) {
+        q[ind] = temp_buff[1];
+        ind++;
+      }
+      if (temp_buff[2] >= 48 && temp_buff[2] <= 57) {
+        q[ind] = temp_buff[2];
+        ind++;
+      }
+      if (temp_buff[3] >= 48 && temp_buff[3] <= 57) {
+        q[ind] = temp_buff[3];
+        ind++;
+      }
+
+      q[ind] = 0;
+      ind++;
+    } else if (asc == 'N') {
+      q[ind] = static_cast<char>((temp2 >> 8) & 0xFF);
+      q[ind + 1] = static_cast<char>(temp2 & 0xFF);
+      ind += 2;
+    }
+  }
+
   void MODE2ISR() {
-    int temp = 0, temp2 = 0, ind = 0;
-    int j;
-    short a;
-    char q[50], temp_buff[4];
+    int ind = 0;
+    char q[50] = {};
 
     T0IR = 1;  // reset TMR0 interrupt
 
-    for (j = 0; j < 50; j++) {
-      q[j] = 0;
-    }
-
     // Get AD1.3
     if (ad1_3 == 'Y') {
-      AD1CR = 0x00020FF08;  // AD1.3
+      AD1CR = 0x0020FF08;   // AD1.3
       AD1CR |= 0x01000000;  // start conversion
+      int temp(0);
       while ((temp & 0x80000000) == 0) {
         temp = AD1DR;
       }
       temp &= 0x0000FFC0;
-      temp2 = temp / 0x00000040;
+      auto const temp2 = temp / 0x00000040;
 
       AD1CR = 0x00000000;
 
-      if (asc == 'Y') {
-        itoa(temp2, 10, temp_buff);
-        if (temp_buff[0] >= 48 && temp_buff[0] <= 57) {
-          q[ind] = temp_buff[0];
-          ind++;
-        }
-        if (temp_buff[1] >= 48 && temp_buff[1] <= 57) {
-          q[ind] = temp_buff[1];
-          ind++;
-        }
-        if (temp_buff[2] >= 48 && temp_buff[2] <= 57) {
-          q[ind] = temp_buff[2];
-          ind++;
-        }
-        if (temp_buff[3] >= 48 && temp_buff[3] <= 57) {
-          q[ind] = temp_buff[3];
-          ind++;
-        }
-
-        q[ind] = 0;
-        ind++;
-        temp = 0;
-        temp2 = 0;
-        temp_buff[0] = 0;
-        temp_buff[1] = 0;
-        temp_buff[2] = 0;
-        temp_buff[3] = 0;
-
-      } else if (asc == 'N') {
-        a = ((short)temp2 & 0xFF00) / 0x00000100;
-        q[ind] = (char)a;
-
-        q[ind + 1] = (char)temp2 & 0xFF;
-        ind += 2;
-        temp = 0;
-      }
+      pushValue(q, ind, temp2);
     }
     // Get AD0.3
     if (ad0_3 == 'Y') {
       AD0CR = 0x00020FF08;  // AD0.3
       AD0CR |= 0x01000000;  // start conversion
+      int temp(0);
       while ((temp & 0x80000000) == 0) {
         temp = AD0DR;
       }
       temp &= 0x0000FFC0;
-      temp2 = temp / 0x00000040;
+      auto const temp2 = temp / 0x00000040;
 
       AD0CR = 0x00000000;
 
-      if (asc == 'Y') {
-        itoa(temp2, 10, temp_buff);
-        if (temp_buff[0] >= 48 && temp_buff[0] <= 57) {
-          q[ind] = temp_buff[0];
-          ind++;
-        }
-        if (temp_buff[1] >= 48 && temp_buff[1] <= 57) {
-          q[ind] = temp_buff[1];
-          ind++;
-        }
-        if (temp_buff[2] >= 48 && temp_buff[2] <= 57) {
-          q[ind] = temp_buff[2];
-          ind++;
-        }
-        if (temp_buff[3] >= 48 && temp_buff[3] <= 57) {
-          q[ind] = temp_buff[3];
-          ind++;
-        }
-
-        q[ind] = 0;
-        ind++;
-        temp = 0;
-        temp2 = 0;
-        temp_buff[0] = 0;
-        temp_buff[1] = 0;
-        temp_buff[2] = 0;
-        temp_buff[3] = 0;
-
-      } else if (asc == 'N') {
-        a = ((short)temp2 & 0xFF00) / 0x00000100;
-        q[ind] = (char)a;
-
-        q[ind + 1] = (char)temp2 & 0xFF;
-        ind += 2;
-        temp = 0;
-      }
+      pushValue(q, ind, temp2);
     }
     // Get AD0.2
     if (ad0_2 == 'Y') {
       AD0CR = 0x00020FF04;  // AD1.2
       AD0CR |= 0x01000000;  // start conversion
+      int temp(0);
       while ((temp & 0x80000000) == 0) {
         temp = AD0DR;
       }
       temp &= 0x0000FFC0;
-      temp2 = temp / 0x00000040;
+      auto const temp2 = temp / 0x00000040;
 
       AD0CR = 0x00000000;
 
-      if (asc == 'Y') {
-        itoa(temp2, 10, temp_buff);
-        if (temp_buff[0] >= 48 && temp_buff[0] <= 57) {
-          q[ind] = temp_buff[0];
-          ind++;
-        }
-        if (temp_buff[1] >= 48 && temp_buff[1] <= 57) {
-          q[ind] = temp_buff[1];
-          ind++;
-        }
-        if (temp_buff[2] >= 48 && temp_buff[2] <= 57) {
-          q[ind] = temp_buff[2];
-          ind++;
-        }
-        if (temp_buff[3] >= 48 && temp_buff[3] <= 57) {
-          q[ind] = temp_buff[3];
-          ind++;
-        }
-
-        q[ind] = 0;
-        ind++;
-        temp = 0;
-        temp2 = 0;
-        temp_buff[0] = 0;
-        temp_buff[1] = 0;
-        temp_buff[2] = 0;
-        temp_buff[3] = 0;
-      } else if (asc == 'N') {
-        a = ((short)temp2 & 0xFF00) / 0x00000100;
-        q[ind] = (char)a;
-
-        q[ind + 1] = (char)temp2 & 0xFF;
-        ind += 2;
-        temp = 0;
-      }
+      pushValue(q, ind, temp2);
     }
     // Get AD0.1
     if (ad0_1 == 'Y') {
       AD0CR = 0x00020FF02;  // AD0.1
       AD0CR |= 0x01000000;  // start conversion
+      int temp(0);
       while ((temp & 0x80000000) == 0) {
         temp = AD0DR;
       }
       temp &= 0x0000FFC0;
-      temp2 = temp / 0x00000040;
+      auto const temp2 = temp / 0x00000040;
 
       AD0CR = 0x00000000;
 
-      if (asc == 'Y') {
-        itoa(temp2, 10, temp_buff);
-        if (temp_buff[0] >= 48 && temp_buff[0] <= 57) {
-          q[ind] = temp_buff[0];
-          ind++;
-        }
-        if (temp_buff[1] >= 48 && temp_buff[1] <= 57) {
-          q[ind] = temp_buff[1];
-          ind++;
-        }
-        if (temp_buff[2] >= 48 && temp_buff[2] <= 57) {
-          q[ind] = temp_buff[2];
-          ind++;
-        }
-        if (temp_buff[3] >= 48 && temp_buff[3] <= 57) {
-          q[ind] = temp_buff[3];
-          ind++;
-        }
-
-        q[ind] = 0;
-        ind++;
-        temp = 0;
-        temp2 = 0;
-        temp_buff[0] = 0;
-        temp_buff[1] = 0;
-        temp_buff[2] = 0;
-        temp_buff[3] = 0;
-      } else if (asc == 'N') {
-        a = ((short)temp2 & 0xFF00) / 0x00000100;
-        q[ind] = (char)a;
-
-        q[ind + 1] = (char)temp2 & 0xFF;
-        ind += 2;
-        temp = 0;
-      }
+      pushValue(q, ind, temp2);
     }
     // Get AD1.2
     if (ad1_2 == 'Y') {
       AD1CR = 0x00020FF04;  // AD1.2
       AD1CR |= 0x01000000;  // start conversion
+      int temp(0);
       while ((temp & 0x80000000) == 0) {
         temp = AD1DR;
       }
       temp &= 0x0000FFC0;
-      temp2 = temp / 0x00000040;
+      auto const temp2 = temp / 0x00000040;
 
       AD1CR = 0x00000000;
 
-      if (asc == 'Y') {
-        itoa(temp2, 10, temp_buff);
-        if (temp_buff[0] >= 48 && temp_buff[0] <= 57) {
-          q[ind] = temp_buff[0];
-          ind++;
-        }
-        if (temp_buff[1] >= 48 && temp_buff[1] <= 57) {
-          q[ind] = temp_buff[1];
-          ind++;
-        }
-        if (temp_buff[2] >= 48 && temp_buff[2] <= 57) {
-          q[ind] = temp_buff[2];
-          ind++;
-        }
-        if (temp_buff[3] >= 48 && temp_buff[3] <= 57) {
-          q[ind] = temp_buff[3];
-          ind++;
-        }
-
-        q[ind] = 0;
-        ind++;
-        temp = 0;
-        temp2 = 0;
-        temp_buff[0] = 0;
-        temp_buff[1] = 0;
-        temp_buff[2] = 0;
-        temp_buff[3] = 0;
-      } else if (asc == 'N') {
-        a = ((short)temp2 & 0xFF00) / 0x00000100;
-        q[ind] = (char)a;
-
-        q[ind + 1] = (char)temp2 & 0xFF;
-        ind += 2;
-        temp = 0;
-      }
+      pushValue(q, ind, temp2);
     }
     // Get AD0.4
     if (ad0_4 == 'Y') {
       AD0CR = 0x00020FF10;  // AD0.4
       AD0CR |= 0x01000000;  // start conversion
+      int temp(0);
       while ((temp & 0x80000000) == 0) {
         temp = AD0DR;
       }
       temp &= 0x0000FFC0;
-      temp2 = temp / 0x00000040;
+      auto const temp2 = temp / 0x00000040;
 
       AD0CR = 0x00000000;
 
-      if (asc == 'Y') {
-        itoa(temp2, 10, temp_buff);
-        if (temp_buff[0] >= 48 && temp_buff[0] <= 57) {
-          q[ind] = temp_buff[0];
-          ind++;
-        }
-        if (temp_buff[1] >= 48 && temp_buff[1] <= 57) {
-          q[ind] = temp_buff[1];
-          ind++;
-        }
-        if (temp_buff[2] >= 48 && temp_buff[2] <= 57) {
-          q[ind] = temp_buff[2];
-          ind++;
-        }
-        if (temp_buff[3] >= 48 && temp_buff[3] <= 57) {
-          q[ind] = temp_buff[3];
-          ind++;
-        }
-
-        q[ind] = 0;
-        ind++;
-        temp = 0;
-        temp2 = 0;
-        temp_buff[0] = 0;
-        temp_buff[1] = 0;
-        temp_buff[2] = 0;
-        temp_buff[3] = 0;
-      } else if (asc == 'N') {
-        a = ((short)temp2 & 0xFF00) / 0x00000100;
-        q[ind] = (char)a;
-
-        q[ind + 1] = (char)temp2 & 0xFF;
-        ind += 2;
-        temp = 0;
-      }
+      pushValue(q, ind, temp2);
     }
     // Get AD1.7
     if (ad1_7 == 'Y') {
       AD1CR = 0x00020FF80;  // AD1.7
       AD1CR |= 0x01000000;  // start conversion
+      int temp(0);
       while ((temp & 0x80000000) == 0) {
         temp = AD1DR;
       }
       temp &= 0x0000FFC0;
-      temp2 = temp / 0x00000040;
+      auto const temp2 = temp / 0x00000040;
 
       AD1CR = 0x00000000;
 
-      if (asc == 'Y') {
-        itoa(temp2, 10, temp_buff);
-        if (temp_buff[0] >= 48 && temp_buff[0] <= 57) {
-          q[ind] = temp_buff[0];
-          ind++;
-        }
-        if (temp_buff[1] >= 48 && temp_buff[1] <= 57) {
-          q[ind] = temp_buff[1];
-          ind++;
-        }
-        if (temp_buff[2] >= 48 && temp_buff[2] <= 57) {
-          q[ind] = temp_buff[2];
-          ind++;
-        }
-        if (temp_buff[3] >= 48 && temp_buff[3] <= 57) {
-          q[ind] = temp_buff[3];
-          ind++;
-        }
-
-        q[ind] = 0;
-        ind++;
-        temp = 0;
-        temp2 = 0;
-        temp_buff[0] = 0;
-        temp_buff[1] = 0;
-        temp_buff[2] = 0;
-        temp_buff[3] = 0;
-      } else if (asc == 'N') {
-        a = ((short)temp2 & 0xFF00) / 0x00000100;
-        q[ind] = (char)a;
-
-        q[ind + 1] = (char)temp2 & 0xFF;
-        ind += 2;
-        temp = 0;
-      }
+      pushValue(q, ind, temp2);
     }
     // Get AD1.6
     if (ad1_6 == 'Y') {
       AD1CR = 0x00020FF40;  // AD1.3
       AD1CR |= 0x01000000;  // start conversion
+      int temp(0);
       while ((temp & 0x80000000) == 0) {
         temp = AD1DR;
       }
       temp &= 0x0000FFC0;
-      temp2 = temp / 0x00000040;
+      auto const temp2 = temp / 0x00000040;
 
       AD1CR = 0x00000000;
 
-      if (asc == 'Y') {
-        itoa(temp2, 10, temp_buff);
-        if (temp_buff[0] >= 48 && temp_buff[0] <= 57) {
-          q[ind] = temp_buff[0];
-          ind++;
-        }
-        if (temp_buff[1] >= 48 && temp_buff[1] <= 57) {
-          q[ind] = temp_buff[1];
-          ind++;
-        }
-        if (temp_buff[2] >= 48 && temp_buff[2] <= 57) {
-          q[ind] = temp_buff[2];
-          ind++;
-        }
-        if (temp_buff[3] >= 48 && temp_buff[3] <= 57) {
-          q[ind] = temp_buff[3];
-          ind++;
-        }
-
-        q[ind] = 0;
-        ind++;
-        temp = 0;
-        temp2 = 0;
-        temp_buff[0] = 0;
-        temp_buff[1] = 0;
-        temp_buff[2] = 0;
-        temp_buff[3] = 0;
-      } else if (asc == 'N') {
-        a = ((short)temp2 & 0xFF00) / 0x00000100;
-        q[ind] = (char)a;
-
-        q[ind + 1] = (char)temp2 & 0xFF;
-        ind += 2;
-        temp = 0;
-      }
+      pushValue(q, ind, temp2);
     }
 
-    for (j = 0; j < ind; j++) {
+    for (int j = 0; j < ind; j++) {
       if (RX_in < 512) {
         RX_array1[RX_in] = q[j];
         RX_in++;
