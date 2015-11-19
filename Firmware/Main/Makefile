@@ -171,7 +171,7 @@ CONLYFLAGS += -Wmissing-declarations
 endif
 
 # flags only for C++ (arm-elf-g++)
-CPPFLAGS = -fno-rtti -fno-exceptions
+CPPFLAGS = -fno-rtti -fno-exceptions -std=c++11
 
 # Assembler flags.
 #  -Wa,...:    tell GCC to pass this to the assembler.
