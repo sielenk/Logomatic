@@ -257,29 +257,19 @@ namespace {
 
     if (asc == 'Y') {
       itoa(temp2, 10, temp_buff);
-      if (temp_buff[0] >= 48 && temp_buff[0] <= 57) {
-        q[ind] = temp_buff[0];
-        ind++;
-      }
-      if (temp_buff[1] >= 48 && temp_buff[1] <= 57) {
-        q[ind] = temp_buff[1];
-        ind++;
-      }
-      if (temp_buff[2] >= 48 && temp_buff[2] <= 57) {
-        q[ind] = temp_buff[2];
-        ind++;
-      }
-      if (temp_buff[3] >= 48 && temp_buff[3] <= 57) {
-        q[ind] = temp_buff[3];
-        ind++;
+
+      for (int i = 0; i < 4; ++i) {
+        char const c(temp_buff[i]);
+
+        if ('0' <= c && c <= '9') {
+          q[ind++] = c;
+        }
       }
 
-      q[ind] = 0;
-      ind++;
+      q[ind++] = 0;
     } else if (asc == 'N') {
-      q[ind] = static_cast<char>((temp2 >> 8) & 0xFF);
-      q[ind + 1] = static_cast<char>(temp2 & 0xFF);
-      ind += 2;
+      q[ind++] = static_cast<char>((temp2 >> 8) & 0xFF);
+      q[ind++] = static_cast<char>(temp2 & 0xFF);
     }
   }
 
