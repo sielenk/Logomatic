@@ -285,7 +285,6 @@ static void MODE2ISR(void) {
 
       q[ind] = 0;
       ind++;
-      temp = 0;
       temp2 = 0;
       temp_buff[0] = 0;
       temp_buff[1] = 0;
@@ -298,8 +297,9 @@ static void MODE2ISR(void) {
 
       q[ind + 1] = (char)temp2 & 0xFF;
       ind += 2;
-      temp = 0;
     }
+
+    temp = 0;
   }
   // Get AD0.3
   if (ad0_3 == 'Y') {
@@ -334,7 +334,6 @@ static void MODE2ISR(void) {
 
       q[ind] = 0;
       ind++;
-      temp = 0;
       temp2 = 0;
       temp_buff[0] = 0;
       temp_buff[1] = 0;
@@ -347,8 +346,9 @@ static void MODE2ISR(void) {
 
       q[ind + 1] = (char)temp2 & 0xFF;
       ind += 2;
-      temp = 0;
     }
+
+    temp = 0;
   }
   // Get AD0.2
   if (ad0_2 == 'Y') {
@@ -383,7 +383,6 @@ static void MODE2ISR(void) {
 
       q[ind] = 0;
       ind++;
-      temp = 0;
       temp2 = 0;
       temp_buff[0] = 0;
       temp_buff[1] = 0;
@@ -395,8 +394,9 @@ static void MODE2ISR(void) {
 
       q[ind + 1] = (char)temp2 & 0xFF;
       ind += 2;
-      temp = 0;
     }
+
+    temp = 0;
   }
   // Get AD0.1
   if (ad0_1 == 'Y') {
@@ -431,7 +431,6 @@ static void MODE2ISR(void) {
 
       q[ind] = 0;
       ind++;
-      temp = 0;
       temp2 = 0;
       temp_buff[0] = 0;
       temp_buff[1] = 0;
@@ -443,8 +442,9 @@ static void MODE2ISR(void) {
 
       q[ind + 1] = (char)temp2 & 0xFF;
       ind += 2;
-      temp = 0;
     }
+
+    temp = 0;
   }
   // Get AD1.2
   if (ad1_2 == 'Y') {
@@ -479,7 +479,6 @@ static void MODE2ISR(void) {
 
       q[ind] = 0;
       ind++;
-      temp = 0;
       temp2 = 0;
       temp_buff[0] = 0;
       temp_buff[1] = 0;
@@ -491,8 +490,9 @@ static void MODE2ISR(void) {
 
       q[ind + 1] = (char)temp2 & 0xFF;
       ind += 2;
-      temp = 0;
     }
+
+    temp = 0;
   }
   // Get AD0.4
   if (ad0_4 == 'Y') {
@@ -527,7 +527,6 @@ static void MODE2ISR(void) {
 
       q[ind] = 0;
       ind++;
-      temp = 0;
       temp2 = 0;
       temp_buff[0] = 0;
       temp_buff[1] = 0;
@@ -539,8 +538,9 @@ static void MODE2ISR(void) {
 
       q[ind + 1] = (char)temp2 & 0xFF;
       ind += 2;
-      temp = 0;
     }
+
+    temp = 0;
   }
   // Get AD1.7
   if (ad1_7 == 'Y') {
@@ -575,7 +575,6 @@ static void MODE2ISR(void) {
 
       q[ind] = 0;
       ind++;
-      temp = 0;
       temp2 = 0;
       temp_buff[0] = 0;
       temp_buff[1] = 0;
@@ -587,8 +586,9 @@ static void MODE2ISR(void) {
 
       q[ind + 1] = (char)temp2 & 0xFF;
       ind += 2;
-      temp = 0;
     }
+
+    temp = 0;
   }
   // Get AD1.6
   if (ad1_6 == 'Y') {
@@ -623,7 +623,6 @@ static void MODE2ISR(void) {
 
       q[ind] = 0;
       ind++;
-      temp = 0;
       temp2 = 0;
       temp_buff[0] = 0;
       temp_buff[1] = 0;
@@ -635,8 +634,9 @@ static void MODE2ISR(void) {
 
       q[ind + 1] = (char)temp2 & 0xFF;
       ind += 2;
-      temp = 0;
     }
+
+    temp = 0;
   }
 
   for (j = 0; j < ind; j++) {
