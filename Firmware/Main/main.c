@@ -240,7 +240,9 @@ static void UART0ISR_2(void) {
   VICVectAddr = 0;
 }
 
-static void pushValue(char* q, int ind, int temp2) {
+static void pushValue(char* q, int ind, int temp) {
+  int temp2 = (temp & 0xFFC0) / 0x40;
+
   if (asc == 'Y') {
     char temp_buff[4];
 
@@ -264,12 +266,6 @@ static void pushValue(char* q, int ind, int temp2) {
 
     q[ind] = 0;
     ind++;
-    temp2 = 0;
-    temp_buff[0] = 0;
-    temp_buff[1] = 0;
-    temp_buff[2] = 0;
-    temp_buff[3] = 0;
-
   } else if (asc == 'N') {
     short a = ((short)temp2 & 0xFF00) / 0x00000100;
     q[ind] = (char)a;
@@ -280,7 +276,7 @@ static void pushValue(char* q, int ind, int temp2) {
 }
 
 static void MODE2ISR(void) {
-  int temp = 0, temp2 = 0, ind = 0;
+  int ind = 0;
   int j;
   char q[50];
 
@@ -292,131 +288,107 @@ static void MODE2ISR(void) {
 
   // Get AD1.3
   if (ad1_3 == 'Y') {
+    int temp = 0;
+
     AD1CR = 0x00020FF08;  // AD1.3
     AD1CR |= 0x01000000;  // start conversion
     while ((temp & 0x80000000) == 0) {
       temp = AD1DR;
     }
-    temp &= 0x0000FFC0;
-    temp2 = temp / 0x00000040;
-
     AD1CR = 0x00000000;
 
-    pushValue(q, ind, temp2);
-
-    temp = 0;
+    pushValue(q, ind, temp);
   }
   // Get AD0.3
   if (ad0_3 == 'Y') {
+    int temp = 0;
+
     AD0CR = 0x00020FF08;  // AD0.3
     AD0CR |= 0x01000000;  // start conversion
     while ((temp & 0x80000000) == 0) {
       temp = AD0DR;
     }
-    temp &= 0x0000FFC0;
-    temp2 = temp / 0x00000040;
-
     AD0CR = 0x00000000;
 
-    pushValue(q, ind, temp2);
-
-    temp = 0;
+    pushValue(q, ind, temp);
   }
   // Get AD0.2
   if (ad0_2 == 'Y') {
+    int temp = 0;
+
     AD0CR = 0x00020FF04;  // AD1.2
     AD0CR |= 0x01000000;  // start conversion
     while ((temp & 0x80000000) == 0) {
       temp = AD0DR;
     }
-    temp &= 0x0000FFC0;
-    temp2 = temp / 0x00000040;
-
     AD0CR = 0x00000000;
 
-    pushValue(q, ind, temp2);
-
-    temp = 0;
+    pushValue(q, ind, temp);
   }
   // Get AD0.1
   if (ad0_1 == 'Y') {
+    int temp = 0;
+
     AD0CR = 0x00020FF02;  // AD0.1
     AD0CR |= 0x01000000;  // start conversion
     while ((temp & 0x80000000) == 0) {
       temp = AD0DR;
     }
-    temp &= 0x0000FFC0;
-    temp2 = temp / 0x00000040;
-
     AD0CR = 0x00000000;
 
-    pushValue(q, ind, temp2);
-
-    temp = 0;
+    pushValue(q, ind, temp);
   }
   // Get AD1.2
   if (ad1_2 == 'Y') {
+    int temp = 0;
+
     AD1CR = 0x00020FF04;  // AD1.2
     AD1CR |= 0x01000000;  // start conversion
     while ((temp & 0x80000000) == 0) {
       temp = AD1DR;
     }
-    temp &= 0x0000FFC0;
-    temp2 = temp / 0x00000040;
-
     AD1CR = 0x00000000;
 
-    pushValue(q, ind, temp2);
-
-    temp = 0;
+    pushValue(q, ind, temp);
   }
   // Get AD0.4
   if (ad0_4 == 'Y') {
+    int temp = 0;
+
     AD0CR = 0x00020FF10;  // AD0.4
     AD0CR |= 0x01000000;  // start conversion
     while ((temp & 0x80000000) == 0) {
       temp = AD0DR;
     }
-    temp &= 0x0000FFC0;
-    temp2 = temp / 0x00000040;
-
     AD0CR = 0x00000000;
 
-    pushValue(q, ind, temp2);
-
-    temp = 0;
+    pushValue(q, ind, temp);
   }
   // Get AD1.7
   if (ad1_7 == 'Y') {
+    int temp = 0;
+
     AD1CR = 0x00020FF80;  // AD1.7
     AD1CR |= 0x01000000;  // start conversion
     while ((temp & 0x80000000) == 0) {
       temp = AD1DR;
     }
-    temp &= 0x0000FFC0;
-    temp2 = temp / 0x00000040;
-
     AD1CR = 0x00000000;
 
-    pushValue(q, ind, temp2);
-
-    temp = 0;
+    pushValue(q, ind, temp);
   }
   // Get AD1.6
   if (ad1_6 == 'Y') {
+    int temp = 0;
+
     AD1CR = 0x00020FF40;  // AD1.3
     AD1CR |= 0x01000000;  // start conversion
     while ((temp & 0x80000000) == 0) {
       temp = AD1DR;
     }
-    temp &= 0x0000FFC0;
-    temp2 = temp / 0x00000040;
-
     AD1CR = 0x00000000;
 
-    pushValue(q, ind, temp2);
-
-    temp = 0;
+    pushValue(q, ind, temp);
   }
 
   for (j = 0; j < ind; j++) {
