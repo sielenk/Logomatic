@@ -240,10 +240,7 @@ static void UART0ISR_2(void) {
   VICVectAddr = 0;
 }
 
-static int pushValue(char* q, int ind, int rawValue) {
-  // The lower six bits of the ADC result are undefined
-  // and are removed here.
-  int value = rawValue >> 6;
+static int pushValue(char* q, int ind, int value) {
   char* p = q + ind;
 
   if (asc == 'Y') {  // ASCII
@@ -260,17 +257,23 @@ static int pushValue(char* q, int ind, int rawValue) {
 }
 
 static int sample(char* q, int ind, volatile unsigned long* ADxCR,
-                  volatile unsigned long* ADxDR, long l) {
-  int temp = 0;
+                  volatile unsigned long* ADxDR, int bit, char ad_x_bit) {
+  if (ad_x_bit == 'Y') {
+    int value = 0;
 
-  *ADxCR = l;            // AD1.3
-  *ADxCR |= 0x01000000;  // start conversion
-  while ((temp & 0x80000000) == 0) {
-    temp = *ADxDR;
+    *ADxCR = 0x00020FF00 | (1 << bit);
+    *ADxCR |= 0x01000000;  // start conversion
+    while ((value & 0x80000000) == 0) {
+      value = *ADxDR;
+    }
+    *ADxCR = 0x00000000;
+
+    // The lower six bits of the ADC result are undefined
+    // and are removed here.
+    return pushValue(q, ind, value >> 6);
+  } else {
+    return ind;
   }
-  *ADxCR = 0x00000000;
-
-  return pushValue(q, ind, temp);
 }
 
 static void MODE2ISR(void) {
@@ -284,38 +287,14 @@ static void MODE2ISR(void) {
     q[j] = 0;
   }
 
-  // Get AD1.3
-  if (ad1_3 == 'Y') {
-    ind = sample(q, ind, &AD1CR, &AD1DR, 0x00020FF08);
-  }
-  // Get AD0.3
-  if (ad0_3 == 'Y') {
-    ind = sample(q, ind, &AD0CR, &AD0DR, 0X00020FF08);
-  }
-  // Get AD0.2
-  if (ad0_2 == 'Y') {
-    ind = sample(q, ind, &AD0CR, &AD0DR, 0X00020FF04);
-  }
-  // Get AD0.1
-  if (ad0_1 == 'Y') {
-    ind = sample(q, ind, &AD0CR, &AD0DR, 0X00020FF02);
-  }
-  // Get AD1.2
-  if (ad1_2 == 'Y') {
-    ind = sample(q, ind, &AD1CR, &AD1DR, 0X00020FF04);
-  }
-  // Get AD0.4
-  if (ad0_4 == 'Y') {
-    ind = sample(q, ind, &AD0CR, &AD0DR, 0X00020FF10);
-  }
-  // Get AD1.7
-  if (ad1_7 == 'Y') {
-    ind = sample(q, ind, &AD1CR, &AD1DR, 0X00020FF80);
-  }
-  // Get AD1.6
-  if (ad1_6 == 'Y') {
-    ind = sample(q, ind, &AD1CR, &AD1DR, 0X00020FF40);
-  }
+  ind = sample(q, ind, &AD1CR, &AD1DR, 3, ad1_3);
+  ind = sample(q, ind, &AD0CR, &AD0DR, 3, ad0_3);
+  ind = sample(q, ind, &AD0CR, &AD0DR, 2, ad0_2);
+  ind = sample(q, ind, &AD0CR, &AD0DR, 1, ad0_1);
+  ind = sample(q, ind, &AD1CR, &AD1DR, 2, ad1_2);
+  ind = sample(q, ind, &AD0CR, &AD0DR, 4, ad0_4);
+  ind = sample(q, ind, &AD1CR, &AD1DR, 7, ad1_7);
+  ind = sample(q, ind, &AD1CR, &AD1DR, 6, ad1_6);
 
   for (j = 0; j < ind; j++) {
     if (RX_in < 512) {
