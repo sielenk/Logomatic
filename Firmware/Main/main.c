@@ -184,7 +184,9 @@ static void UART0ISR(void) {
 
     RX_in++;
 
-    if (RX_in == buf_size) log_array1 = 1;
+    if (RX_in == buf_size) {
+      log_array1 = 1;
+    }
   } else if (RX_in >= buf_size) {
     RX_array2[RX_in - buf_size] = U0RBR;
     RX_in++;
@@ -241,27 +243,28 @@ static void UART0ISR_2(void) {
 }
 
 static int pushValue(char* q, int ind, int value) {
-  char* p = q + ind;
-
   if (asc == 'Y') {  // ASCII
+    // replace the last NUL with a TAB delimiter
+    if (ind > 1) {
+      q[ind++] = '\t';
+    }
     // itoa returns the number of bytes written excluding
-    // trailing '\0', hence the "+ 1"
-    return itoa(value, 10, p) + ind + 1;
+    // trailing '\0'
+    ind += itoa(value, 10, q + ind);
   } else if (asc == 'N') {  // binary
-    p[0] = value >> 8;
-    p[1] = value;
-    return ind + 2;
-  } else {  // invalid
-    return ind;
+    q[ind++] = value >> 8;
+    q[ind++] = value;
   }
+
+  return ind;
 }
 
 static int sample(char* q, int ind, volatile unsigned long* ADxCR,
-                  volatile unsigned long* ADxDR, int bit, char ad_x_bit) {
+                  volatile unsigned long* ADxDR, int mask, char ad_x_bit) {
   if (ad_x_bit == 'Y') {
     int value = 0;
 
-    *ADxCR = 0x00020FF00 | (1 << bit);
+    *ADxCR = 0x00020FF00 | mask;
     *ADxCR |= 0x01000000;  // start conversion
     while ((value & 0x80000000) == 0) {
       value = *ADxDR;
@@ -290,7 +293,7 @@ static void MODE2ISR(void) {
   }
 
 #define SAMPLE(X, BIT) \
-  ind = sample(q, ind, &AD##X##CR, &AD##X##DR, BIT, ad##X##_##BIT)
+  ind = sample(q, ind, &AD##X##CR, &AD##X##DR, 1 << BIT, ad##X##_##BIT)
   SAMPLE(1, 3);
   SAMPLE(0, 3);
   SAMPLE(0, 2);
@@ -302,22 +305,24 @@ static void MODE2ISR(void) {
 #undef SAMPLE
 
   for (j = 0; j < ind; j++) {
-    if (RX_in < 512) {
+    if (RX_in < buf_size) {
       RX_array1[RX_in] = q[j];
       RX_in++;
 
-      if (RX_in == 512) log_array1 = 1;
-    } else if (RX_in >= 512) {
-      RX_array2[RX_in - 512] = q[j];
+      if (RX_in == buf_size) {
+        log_array1 = 1;
+      }
+    } else if (RX_in >= buf_size) {
+      RX_array2[RX_in - buf_size] = q[j];
       RX_in++;
 
-      if (RX_in == 1024) {
+      if (RX_in == 2 * buf_size) {
         log_array2 = 1;
         RX_in = 0;
       }
     }
   }
-  if (RX_in < 512) {
+  if (RX_in < buf_size) {
     if (asc == 'N') {
       RX_array1[RX_in] = '$';
     } else if (asc == 'Y') {
@@ -325,38 +330,42 @@ static void MODE2ISR(void) {
     }
     RX_in++;
 
-    if (RX_in == 512) log_array1 = 1;
-  } else if (RX_in >= 512) {
-    if (asc == 'N')
-      RX_array2[RX_in - 512] = '$';
-    else if (asc == 'Y') {
-      RX_array2[RX_in - 512] = 13;
+    if (RX_in == buf_size) {
+      log_array1 = 1;
+    }
+  } else if (RX_in >= buf_size) {
+    if (asc == 'N') {
+      RX_array2[RX_in - buf_size] = '$';
+    } else if (asc == 'Y') {
+      RX_array2[RX_in - buf_size] = 13;
     }
     RX_in++;
 
-    if (RX_in == 1024) {
+    if (RX_in == 2 * buf_size) {
       log_array2 = 1;
       RX_in = 0;
     }
   }
-  if (RX_in < 512) {
-    if (asc == 'N')
+  if (RX_in < buf_size) {
+    if (asc == 'N') {
       RX_array1[RX_in] = '$';
-    else if (asc == 'Y') {
+    } else if (asc == 'Y') {
       RX_array1[RX_in] = 10;
     }
     RX_in++;
 
-    if (RX_in == 512) log_array1 = 1;
-  } else if (RX_in >= 512) {
-    if (asc == 'N')
-      RX_array2[RX_in - 512] = '$';
-    else if (asc == 'Y') {
-      RX_array2[RX_in - 512] = 10;
+    if (RX_in == buf_size) {
+      log_array1 = 1;
+    }
+  } else if (RX_in >= buf_size) {
+    if (asc == 'N') {
+      RX_array2[RX_in - buf_size] = '$';
+    } else if (asc == 'Y') {
+      RX_array2[RX_in - buf_size] = 10;
     }
     RX_in++;
 
-    if (RX_in == 1024) {
+    if (RX_in == 2 * buf_size) {
       log_array2 = 1;
       RX_in = 0;
     }
@@ -385,7 +394,9 @@ void SWI_Routine(void) {
     ;
 }
 
-void UNDEF_Routine(void) { stat(0, ON); }
+void UNDEF_Routine(void) {
+  stat(0, ON);
+}
 
 void setup_uart0(int newbaud, char want_ints) {
   baud = newbaud;
