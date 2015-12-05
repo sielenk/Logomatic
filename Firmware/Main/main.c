@@ -184,7 +184,9 @@ static void UART0ISR(void) {
 
     RX_in++;
 
-    if (RX_in == buf_size) log_array1 = 1;
+    if (RX_in == buf_size) {
+      log_array1 = 1;
+    }
   } else if (RX_in >= buf_size) {
     RX_array2[RX_in - buf_size] = U0RBR;
     RX_in++;
@@ -307,7 +309,9 @@ static void MODE2ISR(void) {
       RX_array1[RX_in] = q[j];
       RX_in++;
 
-      if (RX_in == 512) log_array1 = 1;
+      if (RX_in == 512) {
+        log_array1 = 1;
+      }
     } else if (RX_in >= 512) {
       RX_array2[RX_in - 512] = q[j];
       RX_in++;
@@ -326,11 +330,13 @@ static void MODE2ISR(void) {
     }
     RX_in++;
 
-    if (RX_in == 512) log_array1 = 1;
+    if (RX_in == 512) {
+      log_array1 = 1;
+    }
   } else if (RX_in >= 512) {
-    if (asc == 'N')
+    if (asc == 'N') {
       RX_array2[RX_in - 512] = '$';
-    else if (asc == 'Y') {
+    } else if (asc == 'Y') {
       RX_array2[RX_in - 512] = 13;
     }
     RX_in++;
@@ -341,18 +347,20 @@ static void MODE2ISR(void) {
     }
   }
   if (RX_in < 512) {
-    if (asc == 'N')
+    if (asc == 'N') {
       RX_array1[RX_in] = '$';
-    else if (asc == 'Y') {
+    } else if (asc == 'Y') {
       RX_array1[RX_in] = 10;
     }
     RX_in++;
 
-    if (RX_in == 512) log_array1 = 1;
+    if (RX_in == 512) {
+      log_array1 = 1;
+    }
   } else if (RX_in >= 512) {
-    if (asc == 'N')
+    if (asc == 'N') {
       RX_array2[RX_in - 512] = '$';
-    else if (asc == 'Y') {
+    } else if (asc == 'Y') {
       RX_array2[RX_in - 512] = 10;
     }
     RX_in++;
@@ -386,7 +394,9 @@ void SWI_Routine(void) {
     ;
 }
 
-void UNDEF_Routine(void) { stat(0, ON); }
+void UNDEF_Routine(void) {
+  stat(0, ON);
+}
 
 void setup_uart0(int newbaud, char want_ints) {
   baud = newbaud;
