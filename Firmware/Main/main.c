@@ -257,11 +257,11 @@ static int pushValue(char* q, int ind, int value) {
 }
 
 static int sample(char* q, int ind, volatile unsigned long* ADxCR,
-                  volatile unsigned long* ADxDR, int bit, char ad_x_bit) {
+                  volatile unsigned long* ADxDR, int mask, char ad_x_bit) {
   if (ad_x_bit == 'Y') {
     int value = 0;
 
-    *ADxCR = 0x00020FF00 | (1 << bit);
+    *ADxCR = 0x00020FF00 | mask;
     *ADxCR |= 0x01000000;  // start conversion
     while ((value & 0x80000000) == 0) {
       value = *ADxDR;
@@ -290,7 +290,7 @@ static void MODE2ISR(void) {
   }
 
 #define SAMPLE(X, BIT) \
-  ind = sample(q, ind, &AD##X##CR, &AD##X##DR, BIT, ad##X##_##BIT)
+  ind = sample(q, ind, &AD##X##CR, &AD##X##DR, 1 << BIT, ad##X##_##BIT)
   SAMPLE(1, 3);
   SAMPLE(0, 3);
   SAMPLE(0, 2);
