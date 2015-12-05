@@ -104,7 +104,7 @@ int main(void) {
 
   Initialize();
 
-  setup_uart0(9600, 0);
+  // setup_uart0(9600, 0);
 
   fat_initialize();
 
@@ -683,6 +683,7 @@ void mode_action(void) {
       stat(0, ON);
 
       if (fat_write_file(handle, (unsigned char*)RX_array1, stringSize) < 0) {
+        rprintf("failure 1\n\r");
         while (1) {
           stat(0, ON);
           for (j = 0; j < 500000; j++)
@@ -704,6 +705,7 @@ void mode_action(void) {
       stat(1, ON);
 
       if (fat_write_file(handle, (unsigned char*)RX_array2, stringSize) < 0) {
+        rprintf("failure 2\n\r");
         while (1) {
           stat(0, ON);
           for (j = 0; j < 500000; j++)
@@ -732,6 +734,8 @@ void mode_action(void) {
         fat_write_file(handle, (unsigned char*)RX_array2, RX_in - buf_size);
         sd_raw_sync();
       }
+
+      rprintf("stopped\n\r");
       while (1) {
         stat(0, ON);
         for (j = 0; j < 500000; j++)
