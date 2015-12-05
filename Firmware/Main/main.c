@@ -268,9 +268,11 @@ static int sample(char* q, int ind, volatile unsigned long* ADxCR,
     }
     *ADxCR = 0x00000000;
 
-    // The lower six bits of the ADC result are undefined
-    // and are removed here.
-    return pushValue(q, ind, value >> 6);
+    // The upper ten of the lower sixteen bits of 'value' are the
+    // result. The result itself is unsigned. Hence a cast to
+    // 'unsigned short' yields the result with six bits of
+    // noise. Those are removed by the following shift operation.
+    return pushValue(q, ind, (unsigned short)value >> 6);
   } else {
     return ind;
   }
