@@ -241,19 +241,20 @@ static void UART0ISR_2(void) {
 }
 
 static int pushValue(char* q, int ind, int value) {
-  char* p = q + ind;
-
   if (asc == 'Y') {  // ASCII
+    // replace the last NUL with a TAB delimiter
+    if (ind > 1) {
+      q[ind++] = '\t';
+    }
     // itoa returns the number of bytes written excluding
-    // trailing '\0', hence the "+ 1"
-    return itoa(value, 10, p) + ind + 1;
+    // trailing '\0'
+    ind += itoa(value, 10, q + ind);
   } else if (asc == 'N') {  // binary
-    p[0] = value >> 8;
-    p[1] = value;
-    return ind + 2;
-  } else {  // invalid
-    return ind;
+    q[ind++] = value >> 8;
+    q[ind++] = value;
   }
+
+  return ind;
 }
 
 static int sample(char* q, int ind, volatile unsigned long* ADxCR,
