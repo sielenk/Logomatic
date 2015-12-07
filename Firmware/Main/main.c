@@ -77,7 +77,7 @@ void mode_action(void);
 void Log_init(void);
 void test(void);
 void stat(int statnum, int onoff);
-void AD_conversion(int regbank);
+void AD_conversion(int regbank, int pin);
 
 void feed(void);
 
@@ -259,23 +259,29 @@ static int pushValue(char* q, int ind, int value) {
   return ind;
 }
 
-static int sample(char* q, int ind, volatile unsigned long* ADxCR,
-                  volatile unsigned long* ADxDR, int mask, char ad_x_bit) {
-  if (ad_x_bit == 'Y') {
-    int value = 0;
+static int getSample(int bank, int pin) {
+  volatile unsigned long* const ADxCR = !bank ? &AD0CR : &AD1CR;
+  volatile unsigned long* const ADxDR = !bank ? &AD0DR : &AD1DR;
+  int value = 0;
 
-    *ADxCR = 0x00020FF00 | mask;
-    *ADxCR |= 0x01000000;  // start conversion
-    while ((value & 0x80000000) == 0) {
-      value = *ADxDR;
-    }
-    *ADxCR = 0x00000000;
+  *ADxCR = 0x00020FF00 | (1 << pin);
+  *ADxCR |= 0x01000000;  // start conversion
+  while ((value & 0x80000000) == 0) {
+    value = *ADxDR;
+  }
+  *ADxCR = 0x00000000;
 
-    // The upper ten of the lower sixteen bits of 'value' are the
-    // result. The result itself is unsigned. Hence a cast to
-    // 'unsigned short' yields the result with six bits of
-    // noise. Those are removed by the following shift operation.
-    return pushValue(q, ind, (unsigned short)value >> 6);
+  // The upper ten of the lower sixteen bits of 'value' are the
+  // result. The result itself is unsigned. Hence a cast to
+  // 'unsigned short' yields the result with six bits of
+  // noise. Those are removed by the following shift operation.
+  return (unsigned short)value >> 6;
+}
+
+static int sampleAndWrite(char* q, int ind, int bank, int pin,
+                          char ad_bank_pin) {
+  if (ad_bank_pin == 'Y') {
+    return pushValue(q, ind, getSample(bank, pin));
   } else {
     return ind;
   }
@@ -292,8 +298,8 @@ static void MODE2ISR(void) {
     q[j] = 0;
   }
 
-#define SAMPLE(X, BIT) \
-  ind = sample(q, ind, &AD##X##CR, &AD##X##DR, 1 << BIT, ad##X##_##BIT)
+#define SAMPLE(BANK, PIN) \
+  ind = sampleAndWrite(q, ind, BANK, PIN, ad##BANK##_##PIN)
   SAMPLE(1, 3);
   SAMPLE(0, 3);
   SAMPLE(0, 2);
@@ -766,37 +772,14 @@ void test(void) {
   delay_ms(5000);
 
   while ((IOPIN0 & 0x00000008) == 0x00000008) {
-    // Get AD1.3
-    AD1CR = 0x0020FF08;
-    AD_conversion(1);
-
-    // Get AD0.3
-    AD0CR = 0x0020FF08;
-    AD_conversion(0);
-
-    // Get AD0.2
-    AD0CR = 0x0020FF04;
-    AD_conversion(0);
-
-    // Get AD0.1
-    AD0CR = 0x0020FF02;
-    AD_conversion(0);
-
-    // Get AD1.2
-    AD1CR = 0x0020FF04;
-    AD_conversion(1);
-
-    // Get AD0.4
-    AD0CR = 0x0020FF10;
-    AD_conversion(0);
-
-    // Get AD1.7
-    AD1CR = 0x0020FF80;
-    AD_conversion(1);
-
-    // Get AD1.6
-    AD1CR = 0x0020FF40;
-    AD_conversion(1);
+    AD_conversion(1, 3);
+    AD_conversion(0, 3);
+    AD_conversion(0, 2);
+    AD_conversion(0, 1);
+    AD_conversion(1, 2);
+    AD_conversion(0, 4);
+    AD_conversion(1, 7);
+    AD_conversion(1, 6);
 
     delay_ms(1000);
     rprintf("\n\r");
@@ -807,32 +790,8 @@ void test(void) {
     ;
 }
 
-void AD_conversion(int regbank) {
-  int temp = 0, temp2;
-
-  if (!regbank)  // bank 0
-  {
-    AD0CR |= 0x01000000;  // start conversion
-    while ((temp & 0x80000000) == 0) {
-      temp = AD0DR;
-    }
-    temp &= 0x0000FFC0;
-    temp2 = temp / 0x00000040;
-
-    AD0CR = 0x00000000;
-  } else  // bank 1
-  {
-    AD1CR |= 0x01000000;  // start conversion
-    while ((temp & 0x80000000) == 0) {
-      temp = AD1DR;
-    }
-    temp &= 0x0000FFC0;
-    temp2 = temp / 0x00000040;
-
-    AD1CR = 0x00000000;
-  }
-
-  rprintf("%d", temp2);
+void AD_conversion(int regbank, int pin) {
+  rprintf("%d", getSample(regbank, pin));
   rprintf("   ");
 }
 
