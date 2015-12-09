@@ -245,7 +245,7 @@ static void UART0ISR_2(void) {
 static int pushValue(char* q, int ind, int value) {
   if (asc == 'Y') {  // ASCII
     // replace the last NUL with a TAB delimiter
-    if (ind > 1) {
+    if (ind > 0) {
       q[ind++] = '\t';
     }
     // itoa returns the number of bytes written excluding
