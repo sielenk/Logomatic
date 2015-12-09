@@ -31,10 +31,10 @@
 #define ON 1
 #define OFF 0
 
-#define buf_size 512
+#define BUF_SIZE 512
 
-char RX_array1[buf_size];
-char RX_array2[buf_size];
+char RX_array1[BUF_SIZE];
+char RX_array2[BUF_SIZE];
 char log_array1 = 0;
 char log_array2 = 0;
 short RX_in = 0;
@@ -179,19 +179,19 @@ void feed(void) {
 static void UART0ISR(void) {
   char temp;
 
-  if (RX_in < buf_size) {
+  if (RX_in < BUF_SIZE) {
     RX_array1[RX_in] = U0RBR;
 
     RX_in++;
 
-    if (RX_in == buf_size) {
+    if (RX_in == BUF_SIZE) {
       log_array1 = 1;
     }
-  } else if (RX_in >= buf_size) {
-    RX_array2[RX_in - buf_size] = U0RBR;
+  } else if (RX_in >= BUF_SIZE) {
+    RX_array2[RX_in - BUF_SIZE] = U0RBR;
     RX_in++;
 
-    if (RX_in == 2 * buf_size) {
+    if (RX_in == 2 * BUF_SIZE) {
       log_array2 = 1;
       RX_in = 0;
     }
@@ -311,24 +311,24 @@ static void MODE2ISR(void) {
 #undef SAMPLE
 
   for (j = 0; j < ind; j++) {
-    if (RX_in < buf_size) {
+    if (RX_in < BUF_SIZE) {
       RX_array1[RX_in] = q[j];
       RX_in++;
 
-      if (RX_in == buf_size) {
+      if (RX_in == BUF_SIZE) {
         log_array1 = 1;
       }
-    } else if (RX_in >= buf_size) {
-      RX_array2[RX_in - buf_size] = q[j];
+    } else if (RX_in >= BUF_SIZE) {
+      RX_array2[RX_in - BUF_SIZE] = q[j];
       RX_in++;
 
-      if (RX_in == 2 * buf_size) {
+      if (RX_in == 2 * BUF_SIZE) {
         log_array2 = 1;
         RX_in = 0;
       }
     }
   }
-  if (RX_in < buf_size) {
+  if (RX_in < BUF_SIZE) {
     if (asc == 'N') {
       RX_array1[RX_in] = '$';
     } else if (asc == 'Y') {
@@ -336,23 +336,23 @@ static void MODE2ISR(void) {
     }
     RX_in++;
 
-    if (RX_in == buf_size) {
+    if (RX_in == BUF_SIZE) {
       log_array1 = 1;
     }
-  } else if (RX_in >= buf_size) {
+  } else if (RX_in >= BUF_SIZE) {
     if (asc == 'N') {
-      RX_array2[RX_in - buf_size] = '$';
+      RX_array2[RX_in - BUF_SIZE] = '$';
     } else if (asc == 'Y') {
-      RX_array2[RX_in - buf_size] = 13;
+      RX_array2[RX_in - BUF_SIZE] = 13;
     }
     RX_in++;
 
-    if (RX_in == 2 * buf_size) {
+    if (RX_in == 2 * BUF_SIZE) {
       log_array2 = 1;
       RX_in = 0;
     }
   }
-  if (RX_in < buf_size) {
+  if (RX_in < BUF_SIZE) {
     if (asc == 'N') {
       RX_array1[RX_in] = '$';
     } else if (asc == 'Y') {
@@ -360,18 +360,18 @@ static void MODE2ISR(void) {
     }
     RX_in++;
 
-    if (RX_in == buf_size) {
+    if (RX_in == BUF_SIZE) {
       log_array1 = 1;
     }
-  } else if (RX_in >= buf_size) {
+  } else if (RX_in >= BUF_SIZE) {
     if (asc == 'N') {
-      RX_array2[RX_in - buf_size] = '$';
+      RX_array2[RX_in - BUF_SIZE] = '$';
     } else if (asc == 'Y') {
-      RX_array2[RX_in - buf_size] = 10;
+      RX_array2[RX_in - BUF_SIZE] = 10;
     }
     RX_in++;
 
-    if (RX_in == 2 * buf_size) {
+    if (RX_in == 2 * BUF_SIZE) {
       log_array2 = 1;
       RX_in = 0;
     }
@@ -655,7 +655,7 @@ void mode_0(void)  // Auto UART mode
 {
   rprintf("MODE 0\n\r");
   setup_uart0(baud, 1);
-  stringSize = buf_size;
+  stringSize = BUF_SIZE;
   mode_action();
   // rprintf("Exit mode 0\n\r");
 }
@@ -689,7 +689,7 @@ void mode_2(void) {
 
   T0TCR = 0x00000001;  // enable timer
 
-  stringSize = 512;
+  stringSize = BUF_SIZE;
   mode_action();
 }
 
@@ -742,11 +742,11 @@ void mode_action(void) {
     {
       VICIntEnClr = 0xFFFFFFFF;
 
-      if (RX_in < buf_size) {
+      if (RX_in < BUF_SIZE) {
         fat_write_file(handle, (unsigned char*)RX_array1, RX_in);
         sd_raw_sync();
-      } else if (RX_in >= buf_size) {
-        fat_write_file(handle, (unsigned char*)RX_array2, RX_in - buf_size);
+      } else if (RX_in >= BUF_SIZE) {
+        fat_write_file(handle, (unsigned char*)RX_array2, RX_in - BUF_SIZE);
         sd_raw_sync();
       }
       while (1) {
