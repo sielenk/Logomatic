@@ -31,10 +31,10 @@
 #define ON 1
 #define OFF 0
 
-#define buf_size 512
+#define BUF_SIZE 512
 
-char RX_array1[buf_size];
-char RX_array2[buf_size];
+char RX_array1[BUF_SIZE];
+char RX_array2[BUF_SIZE];
 char log_array1 = 0;
 char log_array2 = 0;
 short RX_in = 0;
@@ -77,7 +77,7 @@ void mode_action(void);
 void Log_init(void);
 void test(void);
 void stat(int statnum, int onoff);
-void AD_conversion(int regbank);
+void AD_conversion(int regbank, int pin);
 
 void feed(void);
 
@@ -179,19 +179,19 @@ void feed(void) {
 static void UART0ISR(void) {
   char temp;
 
-  if (RX_in < buf_size) {
+  if (RX_in < BUF_SIZE) {
     RX_array1[RX_in] = U0RBR;
 
     RX_in++;
 
-    if (RX_in == buf_size) {
+    if (RX_in == BUF_SIZE) {
       log_array1 = 1;
     }
-  } else if (RX_in >= buf_size) {
-    RX_array2[RX_in - buf_size] = U0RBR;
+  } else if (RX_in >= BUF_SIZE) {
+    RX_array2[RX_in - BUF_SIZE] = U0RBR;
     RX_in++;
 
-    if (RX_in == 2 * buf_size) {
+    if (RX_in == 2 * BUF_SIZE) {
       log_array2 = 1;
       RX_in = 0;
     }
@@ -245,7 +245,7 @@ static void UART0ISR_2(void) {
 static int pushValue(char* q, int ind, int value) {
   if (asc == 'Y') {  // ASCII
     // replace the last NUL with a TAB delimiter
-    if (ind > 1) {
+    if (ind > 0) {
       q[ind++] = '\t';
     }
     // itoa returns the number of bytes written excluding
@@ -259,23 +259,29 @@ static int pushValue(char* q, int ind, int value) {
   return ind;
 }
 
-static int sample(char* q, int ind, volatile unsigned long* ADxCR,
-                  volatile unsigned long* ADxDR, int mask, char ad_x_bit) {
-  if (ad_x_bit == 'Y') {
-    int value = 0;
+static int getSample(int bank, int pin) {
+  volatile unsigned long* const ADxCR = !bank ? &AD0CR : &AD1CR;
+  volatile unsigned long* const ADxDR = !bank ? &AD0DR : &AD1DR;
+  int value = 0;
 
-    *ADxCR = 0x00020FF00 | mask;
-    *ADxCR |= 0x01000000;  // start conversion
-    while ((value & 0x80000000) == 0) {
-      value = *ADxDR;
-    }
-    *ADxCR = 0x00000000;
+  *ADxCR = 0x00020FF00 | (1 << pin);
+  *ADxCR |= 0x01000000;  // start conversion
+  while ((value & 0x80000000) == 0) {
+    value = *ADxDR;
+  }
+  *ADxCR = 0x00000000;
 
-    // The upper ten of the lower sixteen bits of 'value' are the
-    // result. The result itself is unsigned. Hence a cast to
-    // 'unsigned short' yields the result with six bits of
-    // noise. Those are removed by the following shift operation.
-    return pushValue(q, ind, (unsigned short)value >> 6);
+  // The upper ten of the lower sixteen bits of 'value' are the
+  // result. The result itself is unsigned. Hence a cast to
+  // 'unsigned short' yields the result with six bits of
+  // noise. Those are removed by the following shift operation.
+  return (unsigned short)value >> 6;
+}
+
+static int sampleAndWrite(char* q, int ind, int bank, int pin,
+                          char ad_bank_pin) {
+  if (ad_bank_pin == 'Y') {
+    return pushValue(q, ind, getSample(bank, pin));
   } else {
     return ind;
   }
@@ -292,8 +298,8 @@ static void MODE2ISR(void) {
     q[j] = 0;
   }
 
-#define SAMPLE(X, BIT) \
-  ind = sample(q, ind, &AD##X##CR, &AD##X##DR, 1 << BIT, ad##X##_##BIT)
+#define SAMPLE(BANK, PIN) \
+  ind = sampleAndWrite(q, ind, BANK, PIN, ad##BANK##_##PIN)
   SAMPLE(1, 3);
   SAMPLE(0, 3);
   SAMPLE(0, 2);
@@ -305,24 +311,24 @@ static void MODE2ISR(void) {
 #undef SAMPLE
 
   for (j = 0; j < ind; j++) {
-    if (RX_in < buf_size) {
+    if (RX_in < BUF_SIZE) {
       RX_array1[RX_in] = q[j];
       RX_in++;
 
-      if (RX_in == buf_size) {
+      if (RX_in == BUF_SIZE) {
         log_array1 = 1;
       }
-    } else if (RX_in >= buf_size) {
-      RX_array2[RX_in - buf_size] = q[j];
+    } else if (RX_in >= BUF_SIZE) {
+      RX_array2[RX_in - BUF_SIZE] = q[j];
       RX_in++;
 
-      if (RX_in == 2 * buf_size) {
+      if (RX_in == 2 * BUF_SIZE) {
         log_array2 = 1;
         RX_in = 0;
       }
     }
   }
-  if (RX_in < buf_size) {
+  if (RX_in < BUF_SIZE) {
     if (asc == 'N') {
       RX_array1[RX_in] = '$';
     } else if (asc == 'Y') {
@@ -330,23 +336,23 @@ static void MODE2ISR(void) {
     }
     RX_in++;
 
-    if (RX_in == buf_size) {
+    if (RX_in == BUF_SIZE) {
       log_array1 = 1;
     }
-  } else if (RX_in >= buf_size) {
+  } else if (RX_in >= BUF_SIZE) {
     if (asc == 'N') {
-      RX_array2[RX_in - buf_size] = '$';
+      RX_array2[RX_in - BUF_SIZE] = '$';
     } else if (asc == 'Y') {
-      RX_array2[RX_in - buf_size] = 13;
+      RX_array2[RX_in - BUF_SIZE] = 13;
     }
     RX_in++;
 
-    if (RX_in == 2 * buf_size) {
+    if (RX_in == 2 * BUF_SIZE) {
       log_array2 = 1;
       RX_in = 0;
     }
   }
-  if (RX_in < buf_size) {
+  if (RX_in < BUF_SIZE) {
     if (asc == 'N') {
       RX_array1[RX_in] = '$';
     } else if (asc == 'Y') {
@@ -354,18 +360,18 @@ static void MODE2ISR(void) {
     }
     RX_in++;
 
-    if (RX_in == buf_size) {
+    if (RX_in == BUF_SIZE) {
       log_array1 = 1;
     }
-  } else if (RX_in >= buf_size) {
+  } else if (RX_in >= BUF_SIZE) {
     if (asc == 'N') {
-      RX_array2[RX_in - buf_size] = '$';
+      RX_array2[RX_in - BUF_SIZE] = '$';
     } else if (asc == 'Y') {
-      RX_array2[RX_in - buf_size] = 10;
+      RX_array2[RX_in - BUF_SIZE] = 10;
     }
     RX_in++;
 
-    if (RX_in == 2 * buf_size) {
+    if (RX_in == 2 * BUF_SIZE) {
       log_array2 = 1;
       RX_in = 0;
     }
@@ -649,7 +655,7 @@ void mode_0(void)  // Auto UART mode
 {
   rprintf("MODE 0\n\r");
   setup_uart0(baud, 1);
-  stringSize = buf_size;
+  stringSize = BUF_SIZE;
   mode_action();
   // rprintf("Exit mode 0\n\r");
 }
@@ -683,7 +689,7 @@ void mode_2(void) {
 
   T0TCR = 0x00000001;  // enable timer
 
-  stringSize = 512;
+  stringSize = BUF_SIZE;
   mode_action();
 }
 
@@ -738,11 +744,11 @@ void mode_action(void) {
     {
       VICIntEnClr = 0xFFFFFFFF;
 
-      if (RX_in < buf_size) {
+      if (RX_in < BUF_SIZE) {
         fat_write_file(handle, (unsigned char*)RX_array1, RX_in);
         sd_raw_sync();
-      } else if (RX_in >= buf_size) {
-        fat_write_file(handle, (unsigned char*)RX_array2, RX_in - buf_size);
+      } else if (RX_in >= BUF_SIZE) {
+        fat_write_file(handle, (unsigned char*)RX_array2, RX_in - BUF_SIZE);
         sd_raw_sync();
       }
 
@@ -770,37 +776,14 @@ void test(void) {
   delay_ms(5000);
 
   while ((IOPIN0 & 0x00000008) == 0x00000008) {
-    // Get AD1.3
-    AD1CR = 0x0020FF08;
-    AD_conversion(1);
-
-    // Get AD0.3
-    AD0CR = 0x0020FF08;
-    AD_conversion(0);
-
-    // Get AD0.2
-    AD0CR = 0x0020FF04;
-    AD_conversion(0);
-
-    // Get AD0.1
-    AD0CR = 0x0020FF02;
-    AD_conversion(0);
-
-    // Get AD1.2
-    AD1CR = 0x0020FF04;
-    AD_conversion(1);
-
-    // Get AD0.4
-    AD0CR = 0x0020FF10;
-    AD_conversion(0);
-
-    // Get AD1.7
-    AD1CR = 0x0020FF80;
-    AD_conversion(1);
-
-    // Get AD1.6
-    AD1CR = 0x0020FF40;
-    AD_conversion(1);
+    AD_conversion(1, 3);
+    AD_conversion(0, 3);
+    AD_conversion(0, 2);
+    AD_conversion(0, 1);
+    AD_conversion(1, 2);
+    AD_conversion(0, 4);
+    AD_conversion(1, 7);
+    AD_conversion(1, 6);
 
     delay_ms(1000);
     rprintf("\n\r");
@@ -811,32 +794,8 @@ void test(void) {
     ;
 }
 
-void AD_conversion(int regbank) {
-  int temp = 0, temp2;
-
-  if (!regbank)  // bank 0
-  {
-    AD0CR |= 0x01000000;  // start conversion
-    while ((temp & 0x80000000) == 0) {
-      temp = AD0DR;
-    }
-    temp &= 0x0000FFC0;
-    temp2 = temp / 0x00000040;
-
-    AD0CR = 0x00000000;
-  } else  // bank 1
-  {
-    AD1CR |= 0x01000000;  // start conversion
-    while ((temp & 0x80000000) == 0) {
-      temp = AD1DR;
-    }
-    temp &= 0x0000FFC0;
-    temp2 = temp / 0x00000040;
-
-    AD1CR = 0x00000000;
-  }
-
-  rprintf("%d", temp2);
+void AD_conversion(int regbank, int pin) {
+  rprintf("%d", getSample(regbank, pin));
   rprintf("   ");
 }
 
