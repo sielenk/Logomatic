@@ -12,6 +12,8 @@
 *.o
 *.srec
 *.map
+*.hex
+FW.SFE
 
 ## Notepad++ backup files
 *.bak
