@@ -28,8 +28,8 @@
  * 		     Global Variables
  ******************************************************/
 
-#define ON 1
-#define OFF 0
+enum COLOR { RED = 0x00000004, GREEN = 0x00000800 };
+enum LED_STATE { LED_OFF = 0, LED_ON = 1 };
 
 #define BUF_SIZE 512
 
@@ -76,7 +76,7 @@ void mode_action(void);
 
 void Log_init(void);
 void test(void);
-void stat(int statnum, int onoff);
+void stat(enum COLOR statnum, enum LED_STATE onoff);
 void AD_conversion(int regbank, int pin);
 
 void feed(void);
@@ -110,12 +110,12 @@ int main(void) {
 
   // Flash Status Lights
   for (i = 0; i < 5; i++) {
-    stat(0, ON);
+    stat(RED, LED_ON);
     delay_ms(50);
-    stat(0, OFF);
-    stat(1, ON);
+    stat(RED, LED_OFF);
+    stat(GREEN, LED_ON);
     delay_ms(50);
-    stat(1, OFF);
+    stat(GREEN, LED_OFF);
   }
 
   Log_init();
@@ -127,11 +127,11 @@ int main(void) {
     if (count == 250) {
       rprintf("Too Many Logs!\n\r");
       while (1) {
-        stat(0, ON);
-        stat(1, ON);
+        stat(RED, LED_ON);
+        stat(GREEN, LED_ON);
         delay_ms(1000);
-        stat(0, OFF);
-        stat(1, OFF);
+        stat(RED, LED_OFF);
+        stat(GREEN, LED_OFF);
         delay_ms(1000);
       }
     }
@@ -384,10 +384,10 @@ void FIQ_Routine(void) {
   char a;
   int j;
 
-  stat(0, ON);
+  stat(RED, LED_ON);
   for (j = 0; j < 5000000; j++)
     ;
-  stat(0, OFF);
+  stat(RED, LED_OFF);
   a = U0RBR;
 
   a = U0IIR;  // have to read this to clear the interrupt
@@ -401,7 +401,7 @@ void SWI_Routine(void) {
 }
 
 void UNDEF_Routine(void) {
-  stat(0, ON);
+  stat(RED, LED_ON);
 }
 
 void setup_uart0(int newbaud, char want_ints) {
@@ -457,24 +457,12 @@ void setup_uart0(int newbaud, char want_ints) {
   }
 }
 
-void stat(int statnum, int onoff) {
-  if (statnum)  // Stat 1
-  {
-    if (onoff) {
-      IOCLR0 = 0x00000800;
-    }  // On
-    else {
-      IOSET0 = 0x00000800;
-    }     // Off
-  } else  // Stat 0
-  {
-    if (onoff) {
-      IOCLR0 = 0x00000004;
-    }  // On
-    else {
-      IOSET0 = 0x00000004;
-    }  // Off
-  }
+void stat(enum COLOR color, enum LED_STATE state) {
+  if (state == LED_ON) {
+    IOCLR0 = color;
+  } else {
+    IOSET0 = color;
+  }  // Off
 }
 
 void Log_init(void) {
@@ -494,12 +482,12 @@ void Log_init(void) {
     if (fd == NULL) {
       rprintf("Error creating LOGCON.txt, locking up...\n\r");
       while (1) {
-        stat(0, ON);
+        stat(RED, LED_ON);
         delay_ms(50);
-        stat(0, OFF);
-        stat(1, ON);
+        stat(RED, LED_OFF);
+        stat(GREEN, LED_ON);
         delay_ms(50);
-        stat(1, OFF);
+        stat(GREEN, LED_OFF);
       }
     }
 
@@ -697,46 +685,46 @@ void mode_action(void) {
   int j;
   while (1) {
     if (log_array1 == 1) {
-      stat(0, ON);
+      stat(RED, LED_ON);
 
       if (fat_write_file(handle, (unsigned char*)RX_array1, stringSize) < 0) {
         rprintf("failure 1\n\r");
         while (1) {
-          stat(0, ON);
+          stat(RED, LED_ON);
           for (j = 0; j < 500000; j++)
             ;
-          stat(0, OFF);
-          stat(1, ON);
+          stat(RED, LED_OFF);
+          stat(GREEN, LED_ON);
           for (j = 0; j < 500000; j++)
             ;
-          stat(1, OFF);
+          stat(GREEN, LED_OFF);
         }
       }
 
       sd_raw_sync();
-      stat(0, OFF);
+      stat(RED, LED_OFF);
       log_array1 = 0;
     }
 
     if (log_array2 == 1) {
-      stat(1, ON);
+      stat(GREEN, LED_ON);
 
       if (fat_write_file(handle, (unsigned char*)RX_array2, stringSize) < 0) {
         rprintf("failure 2\n\r");
         while (1) {
-          stat(0, ON);
+          stat(RED, LED_ON);
           for (j = 0; j < 500000; j++)
             ;
-          stat(0, OFF);
-          stat(1, ON);
+          stat(RED, LED_OFF);
+          stat(GREEN, LED_ON);
           for (j = 0; j < 500000; j++)
             ;
-          stat(1, OFF);
+          stat(GREEN, LED_OFF);
         }
       }
 
       sd_raw_sync();
-      stat(1, OFF);
+      stat(GREEN, LED_OFF);
       log_array2 = 0;
     }
 
@@ -754,14 +742,14 @@ void mode_action(void) {
 
       rprintf("stopped\n\r");
       while (1) {
-        stat(0, ON);
+        stat(RED, LED_ON);
         for (j = 0; j < 500000; j++)
           ;
-        stat(0, OFF);
-        stat(1, ON);
+        stat(RED, LED_OFF);
+        stat(GREEN, LED_ON);
         for (j = 0; j < 500000; j++)
           ;
-        stat(1, OFF);
+        stat(GREEN, LED_OFF);
       }
     }
   }
