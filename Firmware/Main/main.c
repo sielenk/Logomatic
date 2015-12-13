@@ -78,6 +78,7 @@ void Log_init(void);
 void test(void);
 void stat(enum COLOR statnum, enum LED_STATE onoff);
 void AD_conversion(int regbank, int pin);
+void blink(int delay, int count);
 
 void feed(void);
 
@@ -96,7 +97,6 @@ void fat_initialize(void);
  ******************************************************/
 
 int main(void) {
-  int i;
   char name[32];
   int count = 0;
 
@@ -109,14 +109,7 @@ int main(void) {
   fat_initialize();
 
   // Flash Status Lights
-  for (i = 0; i < 5; i++) {
-    stat(RED, LED_ON);
-    delay_ms(50);
-    stat(RED, LED_OFF);
-    stat(GREEN, LED_ON);
-    delay_ms(50);
-    stat(GREEN, LED_OFF);
-  }
+  blink(50, 5);
 
   Log_init();
 
@@ -463,6 +456,21 @@ void stat(enum COLOR color, enum LED_STATE state) {
   }  // Off
 }
 
+void blink(int delay, int count) {
+  while (count != 0) {
+    stat(RED, LED_ON);
+    delay_ms(delay);
+    stat(RED, LED_OFF);
+    stat(GREEN, LED_ON);
+    delay_ms(delay);
+    stat(GREEN, LED_OFF);
+
+    if (count > 0) {
+      --count;
+    }
+  }
+}
+
 void Log_init(void) {
   int x, mark = 0, ind = 0;
   char temp, temp2 = 0, safety = 0;
@@ -479,14 +487,7 @@ void Log_init(void) {
     fd = root_open_new("LOGCON.txt");
     if (fd == NULL) {
       rprintf("Error creating LOGCON.txt, locking up...\n\r");
-      while (1) {
-        stat(RED, LED_ON);
-        delay_ms(50);
-        stat(RED, LED_OFF);
-        stat(GREEN, LED_ON);
-        delay_ms(50);
-        stat(GREEN, LED_OFF);
-      }
+      blink(50, -1);
     }
 
     strcpy(stringBuf,
@@ -686,14 +687,7 @@ void mode_action(void) {
 
       if (fat_write_file(handle, (unsigned char*)RX_array1, stringSize) < 0) {
         rprintf("failure 1\n\r");
-        while (1) {
-          stat(RED, LED_ON);
-          delay_ms(50);
-          stat(RED, LED_OFF);
-          stat(GREEN, LED_ON);
-          delay_ms(50);
-          stat(GREEN, LED_OFF);
-        }
+        blink(50, -1);
       }
 
       sd_raw_sync();
@@ -706,14 +700,7 @@ void mode_action(void) {
 
       if (fat_write_file(handle, (unsigned char*)RX_array2, stringSize) < 0) {
         rprintf("failure 2\n\r");
-        while (1) {
-          stat(RED, LED_ON);
-          delay_ms(50);
-          stat(RED, LED_OFF);
-          stat(GREEN, LED_ON);
-          delay_ms(50);
-          stat(GREEN, LED_OFF);
-        }
+        blink(50, -1);
       }
 
       sd_raw_sync();
@@ -734,14 +721,7 @@ void mode_action(void) {
       }
 
       rprintf("stopped\n\r");
-      while (1) {
-        stat(RED, LED_ON);
-        delay_ms(50);
-        stat(RED, LED_OFF);
-        stat(GREEN, LED_ON);
-        delay_ms(50);
-        stat(GREEN, LED_OFF);
-      }
+      blink(50, -1);
     }
   }
 }
