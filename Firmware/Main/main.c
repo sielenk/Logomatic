@@ -385,8 +385,7 @@ void FIQ_Routine(void) {
   int j;
 
   stat(RED, LED_ON);
-  for (j = 0; j < 5000000; j++)
-    ;
+  delay_ms(500);
   stat(RED, LED_OFF);
   a = U0RBR;
 
@@ -691,12 +690,10 @@ void mode_action(void) {
         rprintf("failure 1\n\r");
         while (1) {
           stat(RED, LED_ON);
-          for (j = 0; j < 500000; j++)
-            ;
+          delay_ms(50);
           stat(RED, LED_OFF);
           stat(GREEN, LED_ON);
-          for (j = 0; j < 500000; j++)
-            ;
+          delay_ms(50);
           stat(GREEN, LED_OFF);
         }
       }
@@ -713,12 +710,10 @@ void mode_action(void) {
         rprintf("failure 2\n\r");
         while (1) {
           stat(RED, LED_ON);
-          for (j = 0; j < 500000; j++)
-            ;
+          delay_ms(50);
           stat(RED, LED_OFF);
           stat(GREEN, LED_ON);
-          for (j = 0; j < 500000; j++)
-            ;
+          delay_ms(50);
           stat(GREEN, LED_OFF);
         }
       }
@@ -743,12 +738,10 @@ void mode_action(void) {
       rprintf("stopped\n\r");
       while (1) {
         stat(RED, LED_ON);
-        for (j = 0; j < 500000; j++)
-          ;
+        delay_ms(50);
         stat(RED, LED_OFF);
         stat(GREEN, LED_ON);
-        for (j = 0; j < 500000; j++)
-          ;
+        delay_ms(50);
         stat(GREEN, LED_OFF);
       }
     }
