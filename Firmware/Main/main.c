@@ -78,7 +78,7 @@ void Log_init(void);
 void test(void);
 void stat(enum COLOR statnum, enum LED_STATE onoff);
 void AD_conversion(int regbank, int pin);
-void blink(int delay, int count);
+void blink(int delay, int count, unsigned long pattern);
 
 void feed(void);
 
@@ -109,7 +109,7 @@ int main(void) {
   fat_initialize();
 
   // Flash Status Lights
-  blink(50, 5);
+  blink(50, 10, 0x66666666);
 
   Log_init();
 
@@ -119,14 +119,7 @@ int main(void) {
     count++;
     if (count == 250) {
       rprintf("Too Many Logs!\n\r");
-      while (1) {
-        stat(RED, LED_ON);
-        stat(GREEN, LED_ON);
-        delay_ms(1000);
-        stat(RED, LED_OFF);
-        stat(GREEN, LED_OFF);
-        delay_ms(1000);
-      }
+      blink(1000, -1, 0x03030303);
     }
     string_printf(name, "LOG%02d.txt", count);
   }
@@ -453,22 +446,29 @@ void stat(enum COLOR color, enum LED_STATE state) {
     IOCLR0 = color;
   } else {
     IOSET0 = color;
-  }  // Off
+  }
 }
 
-void blink(int delay, int count) {
+void blink(int delay, int count, unsigned long pattern) {
+  unsigned long mask = 0;
   while (count != 0) {
-    stat(RED, LED_ON);
+    if (!mask) {
+      mask = 1;
+    }
+
+    stat(RED, (pattern & mask) ? LED_ON : LED_OFF);
+    stat(GREEN, (pattern & (mask << 1)) ? LED_ON : LED_OFF);
+
     delay_ms(delay);
-    stat(RED, LED_OFF);
-    stat(GREEN, LED_ON);
-    delay_ms(delay);
-    stat(GREEN, LED_OFF);
 
     if (count > 0) {
       --count;
     }
+
+    mask <<= 2;
   }
+
+  stat(RED | GREEN, LED_OFF);
 }
 
 void Log_init(void) {
@@ -487,7 +487,7 @@ void Log_init(void) {
     fd = root_open_new("LOGCON.txt");
     if (fd == NULL) {
       rprintf("Error creating LOGCON.txt, locking up...\n\r");
-      blink(50, -1);
+      blink(100, -1, 0x11111133);
     }
 
     strcpy(stringBuf,
@@ -687,7 +687,7 @@ void mode_action(void) {
 
       if (fat_write_file(handle, (unsigned char*)RX_array1, stringSize) < 0) {
         rprintf("failure 1\n\r");
-        blink(50, -1);
+        blink(100, -1, 0x11111333);
       }
 
       sd_raw_sync();
@@ -700,7 +700,7 @@ void mode_action(void) {
 
       if (fat_write_file(handle, (unsigned char*)RX_array2, stringSize) < 0) {
         rprintf("failure 2\n\r");
-        blink(50, -1);
+        blink(100, -1, 0x11113333);
       }
 
       sd_raw_sync();
@@ -721,7 +721,7 @@ void mode_action(void) {
       }
 
       rprintf("stopped\n\r");
-      blink(50, -1);
+      blink(100, -1, 0x00000202);
     }
   }
 }
