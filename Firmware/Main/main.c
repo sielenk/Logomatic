@@ -382,7 +382,6 @@ static void MODE2ISR(void) {
 
 void FIQ_Routine(void) {
   char a;
-  int j;
 
   stat(RED, LED_ON);
   delay_ms(500);
@@ -681,7 +680,6 @@ void mode_2(void) {
 }
 
 void mode_action(void) {
-  int j;
   while (1) {
     if (log_array1 == 1) {
       stat(RED, LED_ON);
