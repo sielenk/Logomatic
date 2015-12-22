@@ -148,13 +148,65 @@ int main(void) {
 void Initialize(void) {
   rprintf_devopen(putc_serial0);
 
-  PINSEL0 = 0xCF351505;
-  PINSEL1 = 0x15441801;
-  IODIR0 |= 0x00000884;
-  IOSET0 = 0x00000080;
+  // Symbol | Value | Function
+  // -------|-------|----------------------------------
+  // PINSEL0|       |
+  // P0.0   | 01    | TXD (UART0)
+  // P0.1   | 01    | RxD (UART0)
+  // P0.2   | 00    | GPIO Port 0.2 (red LED)
+  // P0.3   | 00    | GPIO Port 0.3 (stop button)
+  // P0.4   | xx    |  SPI0
+  // P0.5   | xx    |  SPI0 (controlled by sd_raw*.*)
+  // P0.6   | xx    |  SPI0
+  // P0.7   | xx    |  SPI0
+  // P0.8   | 01    | TXD (UART1)
+  // P0.9   | 01    | RXD (UART1)
+  // P0.10  | 11    | AD1.2 (input 7)
+  // P0.11  | 00    | GPIO Port 0.11 (green LED)
+  // P0.12  | 11    | AD1.3 (input 8)
+  // P0.13  | 11    | AD1.4 (battery)
+  // P0.14  | 00    | GPIO Port 0.14 (pin BSL)
+  // P0.15  | xx    | (unconnected)
+  //
+  // PINSEL1|       |
+  // P0.16  | xx    | (unconnected)
+  // P0.17  | xx    |  SPI1
+  // P0.18  | xx    |  SPI1 (unused)
+  // P0.19  | xx    |  SPI1
+  // P0.20  | xx    |  SPI1
+  // P0.21  | 10    | AD1.6 (input 6)
+  // P0.22  | 01    | AD1.7 (input 5)
+  // P0.23  | xx    |  USB
+  // P0.24  | xx    | Reserved
+  // P0.25  | 01    | AD0.4 (input 4)
+  // P0.26  | xx    |  USB
+  // P0.27  | xx    |  USB
+  // P0.28  | 01    | AD0.1 (input 3)
+  // P0.29  | 01    | AD0.2 (input 2)
+  // P0.30  | 01    | AD0.3 (input 1)
+  // P0.31  | xx    |  USB
 
-  S0SPCR = 0x08;  // SPI clk to be pclk/8
-  S0SPCR = 0x30;  // master, msb, first clk edge, active high, no ints
+  // PINSEL0
+  // mask  11 00 00 00 00 00 00 00 11 11 11 11 00 00 00 00
+  //           C     0     0     0     F     F     0     0
+  // value xx 00 11 11 00 11 01 01 xx xx xx xx 00 00 01 01
+  //           0     F     3     5     0     0     0     5
+  PINSEL0 = (PINSEL0 & 0xC000FF00) | 0x0F350005;
+
+  //
+  // PINSEL1
+  // mask  11 00 00 00 11 11 00 11 11 00 00 11 11 11 11 11
+  //           C     0     F     3     C     3     F     F
+  // value xx 01 01 01 xx xx 01 xx xx 01 10 xx xx xx xx xx
+  //           1     5     0     4     1     0     0     0
+  PINSEL1 = (PINSEL1 & 0xC0F3C3FF) | 0x15041000;
+
+  // IODIR0
+  // mask 10001101100111111000000011110000
+  //         8   D   9   F   8   0   F   0
+  // dir  xyyyxxyxxyyxxxxxxIyyOyyyxxxxIOyy (y = non-GPIO)
+  //         0   0   0   0   0   8   0   4
+  IODIR0 = (IODIR0 & 0x8D9F80F0) | 0x00000804;
 }
 
 void feed(void) {
