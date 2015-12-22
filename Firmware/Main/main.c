@@ -171,49 +171,65 @@ int main (void)
 void Initialize(void)
 {
   rprintf_devopen(putc_serial0);
-  
-  // 0xCF351505 = 0b 11 00 11 11 00 11 01 01 00 01 01 01 00 00 01 01
-  // 0x15441801 = 0b 00 01 01 01 01 00 01 00 00 01 10 00 00 00 00 01
-  //
+
   // Symbol | Value | Function
   // -------|-------|----------------------------------
   // PINSEL0|       |
   // P0.0   | 01    | TXD (UART0)
   // P0.1   | 01    | RxD (UART0)
-  // P0.2   | 00    | GPIO Port 0.2
-  // P0.3   | 00    | GPIO Port 0.3
-  // P0.4   | 01    | SCK0 (SPI0)
-  // P0.5   | 01    | MISO0 (SPI0)
-  // P0.6   | 01    | MOSI0 (SPI0)
-  // P0.7   | 00    | GPIO Port 0.7
+  // P0.2   | 00    | GPIO Port 0.2 (red LED)
+  // P0.3   | 00    | GPIO Port 0.3 (stop button)
+  // P0.4   | xx    |  SPI0
+  // P0.5   | xx    |  SPI0 (controlled by sd_raw*.*)
+  // P0.6   | xx    |  SPI0
+  // P0.7   | xx    |  SPI0
   // P0.8   | 01    | TXD (UART1)
   // P0.9   | 01    | RXD (UART1)
-  // P0.10  | 11    | AD1.2
-  // P0.11  | 00    | GPIO Port 0.11
-  // P0.12  | 11    | AD1.3
-  // P0.13  | 11    | AD1.4
-  // P0.14  | 00    | GPIO Port 0.14
-  // P0.15  | 11    | AD1.5
+  // P0.10  | 11    | AD1.2 (input 7)
+  // P0.11  | 00    | GPIO Port 0.11 (green LED)
+  // P0.12  | 11    | AD1.3 (input 8)
+  // P0.13  | 11    | AD1.4 (battery)
+  // P0.14  | 00    | GPIO Port 0.14 (pin BSL)
+  // P0.15  | xx    | (unconnected)
+  //
   // PINSEL1|       |
-  // P0.16  | 01    | EINT0
-  // P0.17  | 00    | GPIO Port 0.17
-  // P0.18  | 00    | GPIO Port 0.18
-  // P0.19  | 00    | GPIO Port 0.19
-  // P0.20  | 00    | GPIO Port 0.20
-  // P0.21  | 10    | AD1.6
-  // P0.22  | 01    | AD1.7
-  // P0.23  | 00    | GPIO Port 0.23
-  // P0.24  | 00    | Reserved
-  // P0.25  | 01    | AD0.4
-  // P0.26  | 00    | Reserved
-  // P0.27  | 01    | Reserved
-  // P0.28  | 01    | AD0.1
-  // P0.29  | 01    | AD0.2
-  // P0.30  | 01    | AD0.3
-  // P0.31  | 00    | GPO Port only
+  // P0.16  | xx    | (unconnected)
+  // P0.17  | xx    |  SPI1
+  // P0.18  | xx    |  SPI1 (unused)
+  // P0.19  | xx    |  SPI1
+  // P0.20  | xx    |  SPI1
+  // P0.21  | 10    | AD1.6 (input 6)
+  // P0.22  | 01    | AD1.7 (input 5)
+  // P0.23  | xx    |  USB
+  // P0.24  | xx    | Reserved
+  // P0.25  | 01    | AD0.4 (input 4)
+  // P0.26  | xx    |  USB
+  // P0.27  | xx    |  USB
+  // P0.28  | 01    | AD0.1 (input 3)
+  // P0.29  | 01    | AD0.2 (input 2)
+  // P0.30  | 01    | AD0.3 (input 1)
+  // P0.31  | xx    |  USB
 
-  PINSEL0 = 0xCF351505;
-  PINSEL1 = 0x15441801;
+  // PINSEL0
+  // mask  11 00 00 00 00 00 00 00 11 11 11 11 00 00 00 00
+  //           C     0     0     0     F     F     0     0
+  // value xx 00 11 11 00 11 01 01 xx xx xx xx 00 00 01 01
+  //           0     F     3     5     0     0     0     5
+  PINSEL0 = (PINSEL0 & 0xC000FF00) | 0x0F350005;
+
+  //
+  // PINSEL1
+  // mask  11 00 00 00 11 11 00 11 11 00 00 11 11 11 11 11
+  //           C     0     F     3     C     3     F     F
+  // value xx 01 01 01 xx xx 01 xx xx 01 10 xx xx xx xx xx
+  //           1     5     0     4     1     0     0     0
+  PINSEL1 = (PINSEL1 & 0xC0F3C3FF) | 0x15041000;
+
+  // IODIR0
+  // mask 10001101100111111000000011110000
+  //         8   D   9   F   8   0   F   0
+  // dir  xyyyxxyxxyyxxxxxxIyyOyyyxxxxIOyy (y = non-GPIO)
+  //         0   0   0   0   0   8   0   4
 
   // P0.0  = INPUT  | TXD (UART0)
   // P0.1  = INPUT  | RxD (UART0)
@@ -228,12 +244,7 @@ void Initialize(void)
   // P0.10 = INPUT  | AD1.2
   // P0.11 = OUTPUT | STAT1 LED
   // Rest of Port 0 are inputs
-  IODIR0 |= 0x00000884;
-  IOSET0 = 0x00000080;  // Set P0.7 HIGH | CS0 HIGH
-
-  S0SPCR = 0x08;  // SPI clk to be pclk/8
-  S0SPCR = 0x30;  // master, msb, first clk edge, active high, no ints
-
+  IODIR0 = (IODIR0 & 0x8D9F80F0) | 0x00000804;
 }
 
 // Make values in PLL control & configure registers take effect 
