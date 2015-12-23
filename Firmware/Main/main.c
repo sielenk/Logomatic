@@ -167,15 +167,15 @@ void Initialize(void) {
   // P0.20  | xx    |  SPI1
   // P0.21  | 10    | AD1.6 (input 6)
   // P0.22  | 01    | AD1.7 (input 5)
-  // P0.23  | xx    |  USB
+  // P0.23  | 01    | Vbus (USB)
   // P0.24  | xx    | Reserved
   // P0.25  | 01    | AD0.4 (input 4)
-  // P0.26  | xx    |  USB
-  // P0.27  | xx    |  USB
+  // P0.26  | xx    | Reserved
+  // P0.27  | xx    | Reserved
   // P0.28  | 01    | AD0.1 (input 3)
   // P0.29  | 01    | AD0.2 (input 2)
   // P0.30  | 01    | AD0.3 (input 1)
-  // P0.31  | xx    |  USB
+  // P0.31  | 10    | CONNECT (USB)
 
   // PINSEL0
   // mask  11 00 00 00 00 00 00 00 11 11 11 11 00 00 00 00
@@ -186,18 +186,18 @@ void Initialize(void) {
 
   //
   // PINSEL1
-  // mask  11 00 00 00 11 11 00 11 11 00 00 11 11 11 11 11
-  //           C     0     F     3     C     3     F     F
-  // value xx 01 01 01 xx xx 01 xx xx 01 10 xx xx xx xx xx
-  //           1     5     0     4     1     8     0     0
-  PINSEL1 = (PINSEL1 & 0xC0F3C3FF) | 0x15041800;
+  // mask  00 00 00 00 11 11 00 11 00 00 00 11 11 11 11 11
+  //           0     0     F     3     0     3     F     F
+  // value 10 01 01 01 xx xx 01 xx 01 01 10 xx xx xx xx xx
+  //           9     5     0     4     5     8     0     0
+  PINSEL1 = (PINSEL1 & 0x00F303FF) | 0x95045800;
 
   // IODIR0
-  // mask 10001101100111111000000011110000
-  //         8   D   9   F   8   0   F   0
-  // dir  xyyyxxyxxyyxxxxxxIyyOyyyxxxxIOyy (y = non-GPIO)
+  // mask 00001101000111111000000011110000
+  //         0   D   1   F   8   0   F   0
+  // dir  yyyyxxyxyyyxxxxxxIyyOyyyxxxxIOyy (y = non-GPIO)
   //         0   0   0   0   0   8   0   4
-  IODIR0 = (IODIR0 & 0x8D9F80F0) | 0x00000804;
+  IODIR0 = (IODIR0 & 0x0D1F80F0) | 0x00000804;
 }
 
 static void UART0ISR(void) {
