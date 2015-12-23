@@ -15,7 +15,6 @@
 #include "rprintf.h"
 
 // Needed for main function calls
-#include "main_msc.h"
 #include "fat.h"
 #include "armVIC.h"
 #include "itoa.h"
@@ -80,8 +79,6 @@ void stat(enum COLOR statnum, enum LED_STATE onoff);
 void AD_conversion(int regbank, int pin);
 void blink(int delay, int count, unsigned long pattern);
 
-void feed(void);
-
 static void UART0ISR(void);    //__attribute__ ((interrupt("IRQ")));
 static void UART0ISR_2(void);  //__attribute__ ((interrupt("IRQ")));
 static void MODE2ISR(void);    //__attribute__ ((interrupt("IRQ")));
@@ -99,8 +96,6 @@ void fat_initialize(void);
 int main(void) {
   char name[32];
   int count = 0;
-
-  enableFIQ();
 
   Initialize();
 
@@ -142,8 +137,6 @@ int main(void) {
 /*******************************************************
  * 		     Initialize
  ******************************************************/
-
-#define PLOCK 0x400
 
 void Initialize(void) {
   rprintf_devopen(putc_serial0);
@@ -207,11 +200,6 @@ void Initialize(void) {
   // dir  xyyyxxyxxyyxxxxxxIyyOyyyxxxxIOyy (y = non-GPIO)
   //         0   0   0   0   0   8   0   4
   IODIR0 = (IODIR0 & 0x8D9F80F0) | 0x00000804;
-}
-
-void feed(void) {
-  PLLFEED = 0xAA;
-  PLLFEED = 0x55;
 }
 
 static void UART0ISR(void) {
@@ -419,25 +407,12 @@ static void MODE2ISR(void) {
 }
 
 void FIQ_Routine(void) {
-  char a;
-
-  stat(RED, LED_ON);
-  delay_ms(500);
-  stat(RED, LED_OFF);
-  a = U0RBR;
-
-  a = U0IIR;  // have to read this to clear the interrupt
-
-  (void)a;
 }
 
 void SWI_Routine(void) {
-  while (1)
-    ;
 }
 
 void UNDEF_Routine(void) {
-  stat(RED, LED_ON);
 }
 
 void setup_uart0(int newbaud, char want_ints) {
