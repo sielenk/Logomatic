@@ -322,14 +322,14 @@ static void MODE2ISR(void) {
 
 #define SAMPLE(BANK, PIN) \
   ind = sampleAndWrite(q, ind, BANK, PIN, ad##BANK##_##PIN)
-  SAMPLE(1, 3);
   SAMPLE(0, 3);
   SAMPLE(0, 2);
   SAMPLE(0, 1);
-  SAMPLE(1, 2);
   SAMPLE(0, 4);
   SAMPLE(1, 7);
   SAMPLE(1, 6);
+  SAMPLE(1, 2);
+  SAMPLE(1, 3);
 #undef SAMPLE
 
   for (j = 0; j < ind; j++) {
