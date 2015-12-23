@@ -307,7 +307,7 @@ uint8_t sd_raw_init()
     unselect_card();
 
     /* switch to highest SPI frequency possible */
-    S0SPCCR = 60; /* ~1MHz-- potentially can be faster */
+    S0SPCCR = 8; /* ~7.5MHz-- potentially can be faster */
 
 #if !SD_RAW_SAVE_RAM
     /* the first block is likely to be accessed first, so precache it here */
