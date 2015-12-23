@@ -187,8 +187,8 @@ void Initialize(void) {
   // mask  11 00 00 00 11 11 00 11 11 00 00 11 11 11 11 11
   //           C     0     F     3     C     3     F     F
   // value xx 01 01 01 xx xx 01 xx xx 01 10 xx xx xx xx xx
-  //           1     5     0     4     1     0     0     0
-  PINSEL1 = (PINSEL1 & 0xC0F3C3FF) | 0x15041000;
+  //           1     5     0     4     1     8     0     0
+  PINSEL1 = (PINSEL1 & 0xC0F3C3FF) | 0x15041800;
 
   // IODIR0
   // mask 10001101100111111000000011110000
