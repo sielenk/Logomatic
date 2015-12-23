@@ -83,10 +83,6 @@ static void UART0ISR(void);    //__attribute__ ((interrupt("IRQ")));
 static void UART0ISR_2(void);  //__attribute__ ((interrupt("IRQ")));
 static void MODE2ISR(void);    //__attribute__ ((interrupt("IRQ")));
 
-void FIQ_Routine(void) __attribute__((interrupt("FIQ")));
-void SWI_Routine(void) __attribute__((interrupt("SWI")));
-void UNDEF_Routine(void) __attribute__((interrupt("UNDEF")));
-
 void fat_initialize(void);
 
 /*******************************************************
@@ -404,15 +400,6 @@ static void MODE2ISR(void) {
   }
 
   VICVectAddr = 0;
-}
-
-void FIQ_Routine(void) {
-}
-
-void SWI_Routine(void) {
-}
-
-void UNDEF_Routine(void) {
 }
 
 void setup_uart0(int newbaud, char want_ints) {
