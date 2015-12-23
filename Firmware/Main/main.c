@@ -230,20 +230,6 @@ void Initialize(void)
   //         8   D   9   F   8   0   F   0
   // dir  xyyyxxyxxyyxxxxxxIyyOyyyxxxxIOyy (y = non-GPIO)
   //         0   0   0   0   0   8   0   4
-
-  // P0.0  = INPUT  | TXD (UART0)
-  // P0.1  = INPUT  | RxD (UART0)
-  // P0.2  = OUTPUT | STAT0 LED
-  // P0.3  = INPUT  | STOP Button
-  // P0.4  = INPUT  | SCK0 (SPI0)
-  // P0.5  = INPUT  | MISO0 (SPI0)
-  // P0.6  = INPUT  | MOSI0 (SPI0)
-  // P0.7  = OUTPUT | Chip Select 0
-  // P0.8  = INPUT  | TXD (UART1)
-  // P0.9  = INPUT  | RXD (UART1)
-  // P0.10 = INPUT  | AD1.2
-  // P0.11 = OUTPUT | STAT1 LED
-  // Rest of Port 0 are inputs
   IODIR0 = (IODIR0 & 0x8D9F80F0) | 0x00000804;
 }
 
