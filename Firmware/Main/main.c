@@ -85,6 +85,8 @@ static void MODE2ISR(void);    //__attribute__ ((interrupt("IRQ")));
 
 void fat_initialize(void);
 
+static unsigned long read(unsigned long);
+
 /*******************************************************
  * 		     	MAIN
  ******************************************************/
@@ -199,10 +201,8 @@ void Initialize(void) {
 }
 
 static void UART0ISR(void) {
-  char temp;
-
   if (RX_in < BUF_SIZE) {
-    RX_array1[RX_in] = U0RBR;
+    RX_array1[RX_in] = read(U0RBR);
 
     RX_in++;
 
@@ -210,7 +210,7 @@ static void UART0ISR(void) {
       log_array1 = 1;
     }
   } else if (RX_in >= BUF_SIZE) {
-    RX_array2[RX_in - BUF_SIZE] = U0RBR;
+    RX_array2[RX_in - BUF_SIZE] = read(U0RBR);
     RX_in++;
 
     if (RX_in == 2 * BUF_SIZE) {
@@ -219,24 +219,21 @@ static void UART0ISR(void) {
     }
   }
 
-  temp = U0IIR;  // Have to read this to clear the interrupt
+  read(U0IIR);  // Have to read this to clear the interrupt
 
   VICVectAddr = 0;
-
-  (void)temp;
 }
 
 static void UART0ISR_2(void) {
-  char temp;
-  temp = U0RBR;
+  char const receivedChar = read(U0RBR);
 
-  if (temp == trig) {
+  if (receivedChar == trig) {
     get_frame = 1;
   }
 
   if (get_frame) {
     if (RX_in < frame) {
-      RX_array1[RX_in] = temp;
+      RX_array1[RX_in] = receivedChar;
       RX_in++;
 
       if (RX_in == frame) {
@@ -246,7 +243,7 @@ static void UART0ISR_2(void) {
         get_frame = 0;
       }
     } else if (RX_in >= frame) {
-      RX_array2[RX_in - frame] = temp;
+      RX_array2[RX_in - frame] = receivedChar;
       RX_in++;
 
       if (RX_in == 2 * frame) {
@@ -259,7 +256,7 @@ static void UART0ISR_2(void) {
     }
   }
 
-  temp = U0IIR;  // have to read this to clear the interrupt
+  read(U0IIR);  // have to read this to clear the interrupt
 
   VICVectAddr = 0;
 }
@@ -782,4 +779,8 @@ void fat_initialize(void) {
   if (openroot()) {
     rprintf("SD OpenRoot Error\n\r");
   }
+}
+
+static unsigned long read(unsigned long value) {
+  return value;
 }
